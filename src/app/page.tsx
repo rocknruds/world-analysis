@@ -1,249 +1,306 @@
-import MapboxMapClient from "@/components/MapboxMapClient";
+import Link from "next/link";
+import { getAllPublicActors } from "@/lib/actors";
+import { getRecentScoreMovers } from "@/lib/scores";
+import { getLatestBrief } from "@/lib/briefs";
+import { getActiveScenarios } from "@/lib/scenarios";
+import ScoreDelta from "@/components/ScoreDelta";
+import ActorCard from "@/components/ActorCard";
+import { pfScoreColor } from "@/components/ActorCard";
 
-const KEY_DEVELOPMENTS = [
-  {
-    date: "2025-02-20",
-    category: "Conflict" as const,
-    title: "Cross-strait patrols intensify after disputed airspace incident",
-    summary:
-      "PLA Navy and ROC vessels maintained parallel patrol lines in the Taiwan Strait. No direct contact reported; both sides issued standard warnings. Regional partners monitoring for escalation.",
-  },
-  {
-    date: "2025-02-19",
-    category: "Legal" as const,
-    title: "ICJ ruling on maritime boundary dispute delayed to Q2",
-    summary:
-      "The Court indicated additional pleadings may be required before a final judgment. Parties have until late March to file supplementary submissions on the new evidence admitted in January.",
-  },
-  {
-    date: "2025-02-18",
-    category: "Sanctions" as const,
-    title: "EU adopts twelfth package targeting circumvention networks",
-    summary:
-      "New designations focus on entities facilitating technology transfers and financial channels. Member states agreed to tighten enforcement of existing oil price cap measures.",
-  },
-  {
-    date: "2025-02-17",
-    category: "Treaty" as const,
-    title: "Regional security pact signing postponed; consultations ongoing",
-    summary:
-      "Several signatory states requested minor amendments to the ratification annex. Organizers expect a new date within two weeks; the core text remains unchanged.",
-  },
-  {
-    date: "2025-02-16",
-    category: "Conflict" as const,
-    title: "Ceasefire talks resume with third-party mediation",
-    summary:
-      "Indirect negotiations continued in a neutral venue. No breakthrough announced; humanitarian corridors and prisoner exchange were discussed. Next round tentatively set for early March.",
-  },
-];
+export const revalidate = 300;
 
-const WATCHLIST = [
-  "Taiwan Strait",
-  "Red Sea",
-  "Sahel",
-  "South China Sea",
-  "Ukraine Front",
-  "Balkans",
-  "Arctic",
-  "Gulf",
-  "Korea",
-  "Horn of Africa",
-];
-
-const BRIEFING_QUEUE = [
-  {
-    title: "Weekly sovereignty digest",
-    lastUpdated: "2025-02-19",
-    description: "Summary of territorial and jurisdictional developments across monitored regions.",
-  },
-  {
-    title: "Sanctions and enforcement tracker",
-    lastUpdated: "2025-02-18",
-    description: "Designations, delistings, and enforcement actions by major sanctioning bodies.",
-  },
-  {
-    title: "Treaty and agreement monitor",
-    lastUpdated: "2025-02-15",
-    description: "Ratifications, withdrawals, and implementation status for key instruments.",
-  },
-];
-
-const CARD_STYLE =
-  "rounded-xl border border-neutral-300/60 bg-white shadow-sm";
-
-export default function Home() {
+function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-dvh bg-neutral-100 text-neutral-900 pb-20">
-
-      {/* Hero banner */}
-      <header className="bg-neutral-50 border-b border-neutral-300/70 py-12 md:py-16">
-        <div className="max-w-3xl mx-auto px-6">
-          <div className="max-w-2xl mx-auto text-center">
-            <h1 className="font-sans font-medium text-5xl md:text-6xl leading-tight tracking-tight text-neutral-800">
-              Atlas Report
-            </h1>
-            <p className="mt-5 text-lg leading-snug text-neutral-600">
-              Tracking sovereignty, conflict, and shifts in international authority.
-            </p>
-          </div>
-        </div>
-      </header>
-
-      {/* Daily Brief + Active Layers (two-card module) */}
-      <section className="max-w-3xl mx-auto px-6 py-10 md:py-12 border-t border-neutral-300/80">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className={`${CARD_STYLE} p-6`}>
-            <h2 className="font-medium text-neutral-900 text-[15px] uppercase tracking-[0.12em] mb-3">
-              Daily Brief
-            </h2>
-            <p className="text-[15px] leading-relaxed text-neutral-600">
-              Today’s summary of sovereignty shifts, conflict updates, and legal developments across monitored regions. Key headlines and analyst notes in one place.
-            </p>
-            <p className="mt-3 text-xs text-neutral-500">
-              Updated: 2025-02-22
-            </p>
-            <a
-              href="#"
-              className="mt-4 inline-block text-sm font-medium text-neutral-700 hover:text-neutral-900 transition-colors"
-            >
-              Read today’s brief
-            </a>
-          </div>
-          <div className={`${CARD_STYLE} p-6`}>
-            <h2 className="font-medium text-neutral-900 text-[15px] uppercase tracking-[0.12em] mb-3">
-              Active Layers
-            </h2>
-            <p className="text-[15px] leading-relaxed text-neutral-600">
-              Toggle conflicts, borders, legal events, and sanctions on the map for context.
-            </p>
-            <div className="mt-4 flex flex-wrap gap-2">
-              {["Conflicts", "Borders", "Legal Events", "Sanctions"].map((label) => (
-                <span
-                  key={label}
-                  className="rounded-lg border border-neutral-300/60 bg-neutral-50 px-3 py-1.5 text-sm text-neutral-700"
-                >
-                  {label}
-                </span>
-              ))}
-            </div>
-            <a
-              href="#"
-              className="mt-4 inline-block text-sm font-medium text-neutral-700 hover:text-neutral-900 transition-colors"
-            >
-              View map layers
-            </a>
-          </div>
-        </div>
-      </section>
-
-      {/* Briefing Queue */}
-      <section className="max-w-3xl mx-auto px-6 py-16 border-t border-neutral-300/80">
-        <h2 className="uppercase text-[15px] tracking-[0.18em] text-sky-600 font-medium mb-6">
-          Briefing Queue
-        </h2>
-        <div className={`${CARD_STYLE} overflow-hidden`}>
-          <ul className="divide-y divide-neutral-200">
-            {BRIEFING_QUEUE.map((b) => (
-              <li key={b.title} className="p-6">
-                <div className="flex flex-wrap items-baseline justify-between gap-2">
-                  <h3 className="font-medium text-neutral-900">{b.title}</h3>
-                  <span className="text-xs text-neutral-500">
-                    Last updated: {b.lastUpdated}
-                  </span>
-                </div>
-                <p className="mt-1 text-sm text-neutral-600">
-                  {b.description}
-                </p>
-              </li>
-            ))}
-          </ul>
-          <div className="border-t border-neutral-200 px-6 pb-6 pt-4">
-            <a
-              href="#"
-              className="text-sm font-medium text-neutral-700 hover:text-neutral-900 transition-colors"
-            >
-              View all briefings
-            </a>
-          </div>
-        </div>
-      </section>
-
-      {/* Map Section */}
-      <section className="max-w-3xl mx-auto px-6 py-16 border-t border-neutral-300/80">
-        <div className="flex items-center justify-between mb-6">
-          <span className="uppercase text-[15px] tracking-[0.18em] text-sky-600 font-medium">
-            Map Module
-          </span>
-          <span className="text-xs text-neutral-600">Updated: —</span>
-        </div>
-        <div className={`${CARD_STYLE} overflow-hidden`}>
-          <MapboxMapClient className="h-[320px] md:h-[420px] w-full" />
-        </div>
-      </section>
-
-      {/* Watchlist */}
-      <section className="max-w-3xl mx-auto px-6 py-16 border-t border-neutral-300/80">
-        <h2 className="uppercase text-[15px] tracking-[0.18em] text-sky-600 font-medium mb-6">
-          Watchlist
-        </h2>
-        <div className={`${CARD_STYLE} p-6`}>
-          <div className="flex flex-wrap gap-2">
-            {WATCHLIST.map((label) => (
-              <span
-                key={label}
-                className="rounded-lg border border-neutral-300/60 bg-neutral-50 px-3 py-1.5 text-sm text-neutral-700"
-              >
-                {label}
-              </span>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Key Developments */}
-      <section className="max-w-3xl mx-auto px-6 py-16 border-t border-neutral-300/80">
-        <h2 className="uppercase text-[15px] tracking-[0.18em] text-sky-600 font-medium mb-6">
-          Key Developments
-        </h2>
-        <div className="space-y-4">
-          {KEY_DEVELOPMENTS.map((item) => (
-            <article
-              key={item.date + item.title.slice(0, 20)}
-              className={`${CARD_STYLE} p-6`}
-            >
-              <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1 text-xs text-neutral-500">
-                <time dateTime={item.date}>{item.date}</time>
-                <span className="font-medium uppercase tracking-wider text-sky-600">
-                  {item.category}
-                </span>
-              </div>
-              <h3 className="mt-2 font-medium text-neutral-900">
-                {item.title}
-              </h3>
-              <p className="mt-2 text-[15px] leading-relaxed text-neutral-600">
-                {item.summary}
-              </p>
-              <a
-                href="#"
-                className="mt-3 inline-block text-sm font-medium text-neutral-700 hover:text-neutral-900 transition-colors"
-              >
-                Read more
-              </a>
-            </article>
-          ))}
-        </div>
-      </section>
-
+    <div className="flex items-center gap-3 mb-6">
+      <span className="w-1 h-4 bg-[#3b82f6] rounded-full" />
+      <h2 className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-400">
+        {children}
+      </h2>
     </div>
   );
 }
 
-/* Dark theme (for later restore):
- * Page/body bg: dark:bg-[#1f2124], dark:text-neutral-200
- * Borders: dark:border-neutral-800/60
- * Muted text: dark:text-neutral-400, nav dark:hover:text-neutral-100
- * Briefing body: dark:text-neutral-300
- * Map card: dark:bg-neutral-900/40 dark:border-neutral-800/60
- * Label accent: dark:text-sky-400/80
- */
+function EmptyState({ message }: { message: string }) {
+  return (
+    <div className="rounded-lg border border-[#1f2937] bg-[#111111] px-6 py-10 text-center text-sm text-gray-600">
+      {message}
+    </div>
+  );
+}
+
+export default async function HomePage() {
+  const [actors, snapshots, latestBrief, scenarios] = await Promise.all([
+    getAllPublicActors(),
+    getRecentScoreMovers(15),
+    getLatestBrief(),
+    getActiveScenarios(),
+  ]);
+
+  const top10 = actors.slice(0, 10);
+
+  // Build actor lookup map for enriching score snapshots
+  const actorMap = new Map(actors.map((a) => [a.id, a]));
+
+  // Build delta map: actorId → most recent delta
+  const deltaMap: Record<string, number> = {};
+  for (const s of snapshots) {
+    for (const id of s.actorIds) {
+      if (!(id in deltaMap)) deltaMap[id] = s.scoreDelta;
+    }
+  }
+
+  // Enrich movers with actor names and only keep those with non-zero delta
+  const movers = snapshots
+    .map((s) => {
+      const actor = actorMap.get(s.actorIds[0]);
+      return {
+        ...s,
+        actorName: actor?.name || s.actorName || "Unknown",
+        pfScore: s.pfScore || actor?.pfScore || 0,
+      };
+    })
+    .filter((s) => s.scoreDelta !== 0)
+    .slice(0, 5);
+
+  return (
+    <div className="min-h-screen bg-[#0a0a0a] text-white">
+      {/* ── Hero ──────────────────────────────────────────────── */}
+      <section className="border-b border-[#1f2937] py-16 md:py-20">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="max-w-2xl">
+            <div className="flex items-center gap-2 mb-5">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#3b82f6] animate-pulse" />
+              <span className="text-xs font-medium tracking-widest uppercase text-[#3b82f6]">
+                PowerFlow Lab
+              </span>
+            </div>
+            <h1 className="text-5xl md:text-6xl font-bold tracking-tight text-white leading-tight mb-5">
+              PowerFlow
+            </h1>
+            <p className="text-lg text-gray-400 leading-relaxed max-w-xl">
+              We don&apos;t analyze what governments claim. We analyze where
+              power actually moves.
+            </p>
+            <div className="flex items-center gap-4 mt-8">
+              <Link
+                href="/actors"
+                className="px-5 py-2.5 bg-[#3b82f6] hover:bg-[#2563eb] text-white text-sm font-semibold rounded-lg transition-colors"
+              >
+                Actor Leaderboard
+              </Link>
+              <Link
+                href="/briefs"
+                className="px-5 py-2.5 border border-[#1f2937] hover:border-[#3b82f6]/50 text-gray-300 hover:text-white text-sm font-semibold rounded-lg transition-colors"
+              >
+                Latest Briefs
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Score Movers Strip ────────────────────────────────── */}
+      {movers.length > 0 && (
+        <section className="border-b border-[#1f2937] py-6">
+          <div className="max-w-7xl mx-auto px-6">
+            <div className="flex items-center gap-4 overflow-x-auto pb-2 scrollbar-none">
+              <span className="text-xs font-semibold uppercase tracking-widest text-gray-600 shrink-0">
+                Score Movers
+              </span>
+              <div className="h-4 w-px bg-[#1f2937] shrink-0" />
+              {movers.map((s) => (
+                <div
+                  key={s.id}
+                  className="flex items-center gap-2.5 shrink-0 bg-[#111111] border border-[#1f2937] rounded-lg px-3 py-2"
+                >
+                  <span className="text-sm font-semibold text-white">
+                    {s.actorName}
+                  </span>
+                  <span
+                    className="text-sm font-bold tabular-nums"
+                    style={{ color: pfScoreColor(s.pfScore) }}
+                  >
+                    {s.pfScore || "—"}
+                  </span>
+                  <ScoreDelta delta={s.scoreDelta} />
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      <div className="max-w-7xl mx-auto px-6 py-12 grid grid-cols-1 lg:grid-cols-3 gap-10">
+        {/* ── Left column: Leaderboard + Brief ─────────────────── */}
+        <div className="lg:col-span-2 space-y-12">
+          {/* Actor Leaderboard */}
+          <section>
+            <div className="flex items-center justify-between mb-6">
+              <SectionLabel>Actor Leaderboard</SectionLabel>
+              <Link
+                href="/actors"
+                className="text-xs text-[#3b82f6] hover:text-[#60a5fa] transition-colors"
+              >
+                View all →
+              </Link>
+            </div>
+            {top10.length === 0 ? (
+              <EmptyState message="No actors available yet." />
+            ) : (
+              <div className="space-y-2">
+                {top10.map((actor, idx) => (
+                  <ActorCard
+                    key={actor.id}
+                    actor={actor}
+                    rank={idx + 1}
+                    delta={deltaMap[actor.id] ?? 0}
+                  />
+                ))}
+              </div>
+            )}
+          </section>
+
+          {/* Latest Brief */}
+          <section>
+            <div className="flex items-center justify-between mb-6">
+              <SectionLabel>Latest Brief</SectionLabel>
+              <Link
+                href="/briefs"
+                className="text-xs text-[#3b82f6] hover:text-[#60a5fa] transition-colors"
+              >
+                All briefs →
+              </Link>
+            </div>
+            {!latestBrief ? (
+              <EmptyState message="No briefs published yet." />
+            ) : (
+              <Link href={`/briefs/${latestBrief.id}`} className="block">
+                <div className="bg-[#111111] border border-[#1f2937] rounded-lg p-6 hover:border-[#3b82f6]/50 transition-colors">
+                  <div className="flex items-center gap-2 mb-3 flex-wrap">
+                    {latestBrief.briefType && (
+                      <span className="text-xs px-2 py-0.5 rounded border border-[#3b82f6]/40 text-[#3b82f6] bg-[#3b82f6]/10 font-medium">
+                        {latestBrief.briefType}
+                      </span>
+                    )}
+                    {latestBrief.status && (
+                      <span
+                        className="text-xs px-2 py-0.5 rounded font-medium"
+                        style={{
+                          color:
+                            latestBrief.status === "Final"
+                              ? "#22c55e"
+                              : "#eab308",
+                          backgroundColor:
+                            latestBrief.status === "Final"
+                              ? "#22c55e18"
+                              : "#eab30818",
+                        }}
+                      >
+                        {latestBrief.status}
+                      </span>
+                    )}
+                  </div>
+                  <h3 className="text-white font-semibold text-lg mb-2">
+                    {latestBrief.title || "Untitled Brief"}
+                  </h3>
+                  {(latestBrief.periodStart || latestBrief.periodEnd) && (
+                    <p className="text-xs text-gray-500 mb-3">
+                      {latestBrief.periodStart &&
+                        new Date(latestBrief.periodStart).toLocaleDateString(
+                          "en-US",
+                          { month: "short", day: "numeric", year: "numeric" }
+                        )}
+                      {latestBrief.periodEnd &&
+                        ` – ${new Date(latestBrief.periodEnd).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}`}
+                    </p>
+                  )}
+                  {latestBrief.editorialPriority && (
+                    <p className="text-sm text-gray-400 line-clamp-3">
+                      {latestBrief.editorialPriority.slice(0, 300)}
+                      {latestBrief.editorialPriority.length > 300 && "…"}
+                    </p>
+                  )}
+                  <span className="mt-4 inline-block text-sm text-[#3b82f6] font-medium">
+                    Read full brief →
+                  </span>
+                </div>
+              </Link>
+            )}
+          </section>
+        </div>
+
+        {/* ── Right column: Active Scenarios ───────────────────── */}
+        <div className="space-y-12">
+          <section>
+            <div className="flex items-center justify-between mb-6">
+              <SectionLabel>Active Scenarios</SectionLabel>
+            </div>
+            {scenarios.length === 0 ? (
+              <EmptyState message="No active scenarios." />
+            ) : (
+              <div className="space-y-3">
+                {scenarios.map((s) => (
+                  <div
+                    key={s.id}
+                    className="bg-[#111111] border border-[#1f2937] rounded-lg p-4"
+                  >
+                    <div className="flex items-start justify-between gap-2 mb-2">
+                      <h3 className="text-sm font-semibold text-white leading-snug">
+                        {s.name || "Unnamed Scenario"}
+                      </h3>
+                      {s.probabilityEstimate !== "" &&
+                        s.probabilityEstimate !== 0 && (
+                          <span className="shrink-0 text-xs font-bold px-2 py-0.5 rounded bg-[#3b82f6]/15 text-[#60a5fa] tabular-nums border border-[#3b82f6]/30">
+                            {typeof s.probabilityEstimate === "number"
+                              ? `${s.probabilityEstimate}%`
+                              : s.probabilityEstimate}
+                          </span>
+                        )}
+                    </div>
+                    {s.scenarioClass && (
+                      <span className="text-xs text-gray-600 font-medium uppercase tracking-wide">
+                        {s.scenarioClass}
+                      </span>
+                    )}
+                    {s.triggerCondition && (
+                      <p className="text-xs text-gray-500 mt-2 leading-relaxed">
+                        {s.triggerCondition.slice(0, 100)}
+                        {s.triggerCondition.length > 100 && "…"}
+                      </p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </section>
+
+          {/* Quick links */}
+          <section>
+            <SectionLabel>Navigate</SectionLabel>
+            <div className="space-y-1.5">
+              {[
+                { href: "/actors", label: "Actor Leaderboard", desc: "All tracked actors by PF Score" },
+                { href: "/briefs", label: "Intelligence Briefs", desc: "Weekly & monthly analysis" },
+                { href: "/conflicts", label: "Conflicts Overview", desc: "Active conflict registry" },
+              ].map(({ href, label, desc }) => (
+                <Link
+                  key={href}
+                  href={href}
+                  className="flex items-start gap-3 p-3 rounded-lg border border-[#1f2937] hover:border-[#3b82f6]/40 hover:bg-[#111111] transition-colors group"
+                >
+                  <span className="w-1 h-1 rounded-full bg-[#3b82f6] mt-2 shrink-0 group-hover:bg-[#60a5fa] transition-colors" />
+                  <div>
+                    <p className="text-sm font-medium text-white group-hover:text-[#60a5fa] transition-colors">
+                      {label}
+                    </p>
+                    <p className="text-xs text-gray-600">{desc}</p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+  );
+}

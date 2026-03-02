@@ -1,37 +1,52 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+
+const NAV_LINKS = [
+  { label: "Dashboard", href: "/" },
+  { label: "Actors", href: "/actors" },
+  { label: "Briefs", href: "/briefs" },
+  { label: "Conflicts", href: "/conflicts" },
+];
 
 export default function Masthead() {
+  const pathname = usePathname();
+
   return (
-    <header className="bg-white/70 backdrop-blur border-b border-neutral-200/70">
-      <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
+    <header className="sticky top-0 z-50 bg-[#0a0a0a]/90 border-b border-[#1f2937] backdrop-blur-md">
+      <div className="max-w-7xl mx-auto px-6 h-14 flex items-center justify-between">
+        {/* Wordmark */}
         <Link
           href="/"
-          className="uppercase text-[11px] tracking-[0.18em] text-neutral-800 font-medium hover:text-neutral-900 transition-colors"
+          className="flex items-center gap-2 group"
+          aria-label="PowerFlow home"
         >
-          SOVEREIGN ATLAS
+          <span className="w-2 h-2 rounded-full bg-[#3b82f6] group-hover:bg-[#60a5fa] transition-colors" />
+          <span className="text-sm font-semibold tracking-[0.12em] uppercase text-white group-hover:text-[#60a5fa] transition-colors">
+            PowerFlow
+          </span>
         </Link>
-        <nav className="flex items-center gap-6 text-sm text-neutral-700">
-          <Link href="/" className="hover:text-neutral-900 transition-colors">
-            Home
-          </Link>
-          <Link href="/events" className="hover:text-neutral-900 transition-colors">
-            Events
-          </Link>
-          <Link href="/countries" className="hover:text-neutral-900 transition-colors">
-            Countries
-          </Link>
-          <a href="#" className="hover:text-neutral-900 transition-colors">
-            Briefings
-          </a>
-          <a href="#" className="hover:text-neutral-900 transition-colors">
-            Map
-          </a>
-          <a href="#" className="hover:text-neutral-900 transition-colors">
-            Regions
-          </a>
-          <a href="#" className="hover:text-neutral-900 transition-colors">
-            About
-          </a>
+
+        {/* Nav */}
+        <nav className="flex items-center gap-1">
+          {NAV_LINKS.map(({ label, href }) => {
+            const active =
+              href === "/" ? pathname === "/" : pathname.startsWith(href);
+            return (
+              <Link
+                key={href}
+                href={href}
+                className={`px-3 py-1.5 text-sm rounded transition-colors ${
+                  active
+                    ? "text-white bg-[#1f2937]"
+                    : "text-gray-400 hover:text-white hover:bg-[#111111]"
+                }`}
+              >
+                {label}
+              </Link>
+            );
+          })}
         </nav>
       </div>
     </header>

@@ -28,24 +28,25 @@ const playfair = Playfair_Display({
 
 export const metadata: Metadata = {
   title: {
-    default: "Sovereign Atlas",
-    template: "%s · Sovereign Atlas",
+    default: "PowerFlow",
+    template: "%s · PowerFlow",
   },
-  description: "Geopolitical briefings with map-driven analysis.",
-  applicationName: "Sovereign Atlas",
+  description:
+    "We don't analyze what governments claim. We analyze where power actually moves.",
+  applicationName: "PowerFlow",
   metadataBase: new URL("http://localhost:3000"),
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <html lang="en" className={`${funnelSans.variable} ${playfair.variable}`}>
-      <body className="font-sans antialiased bg-neutral-100 text-neutral-600">
+      <body className="font-sans antialiased bg-[#0a0a0a] text-white min-h-screen">
         <Masthead />
-        {children}
+        <main className="relative z-10">{children}</main>
       </body>
     </html>
   );
