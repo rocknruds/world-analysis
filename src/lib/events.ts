@@ -1,4 +1,6 @@
-import { notionQueryAll, EVENTS_DB_ID, getTitle, getRichText, getSelect, getDate, getRelation } from "./notion";
+import { queryDatabase, getTitle, getText, getSelect, getDate, getRelationIds } from "./notion";
+
+const EVENTS_DB_ID = process.env.NOTION_EVENTS_DB_ID ?? "70e9768bfcec49a9aa8565d5aa1f1881";
 
 export interface NotionEvent {
   id: string;
@@ -10,7 +12,6 @@ export interface NotionEvent {
   actorIds: string[];
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function parseEvent(page: Record<string, any>): NotionEvent {
   const p = page.properties ?? {};
   return {
@@ -19,22 +20,19 @@ function parseEvent(page: Record<string, any>): NotionEvent {
     date: getDate(p, "Date"),
     eventType: getSelect(p, "Event Type"),
     pfSignal: getSelect(p, "PF Signal"),
-    description: getRichText(p, "Description"),
-    actorIds: getRelation(p, "Key Actors"),
+    description: getText(p, "Description"),
+    actorIds: getRelationIds(p, "Key Actors"),
   };
 }
 
-// Events linked to a specific actor via Key Actors relation
 export async function getActorEvents(actorId: string, limit = 5): Promise<NotionEvent[]> {
-  const pages = await notionQueryAll(EVENTS_DB_ID, {
-    filter: {
-      and: [
-        { property: "Visibility", select: { equals: "Public" } },
-        { property: "Key Actors", relation: { contains: actorId } },
-      ],
+  const pages = await queryDatabase(
+    EVENTS_DB_ID,
+    {
+      property: "Key Actors",
+      relation: { contains: actorId },
     },
-    sorts: [{ property: "Date", direction: "descending" }],
-    page_size: limit,
-  });
+    [{ property: "Date", direction: "descending" }]
+  );
   return pages.slice(0, limit).map(parseEvent);
 }
