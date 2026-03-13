@@ -5,7 +5,6 @@
 /* ============================= */
 
 :root {
-  /* PowerFlow core palette */
   --background: #0a0a0a;
   --foreground: #f5f5f5;
   --surface: #111111;
@@ -17,7 +16,6 @@
   --muted: #6b7280;
   --muted-foreground: #9ca3af;
 
-  /* Score palette */
   --score-high: #22c55e;
   --score-mid: #f59e0b;
   --score-low: #ef4444;
@@ -25,12 +23,10 @@
   --score-authority: #f59e0b;
   --score-reach: #f97316;
 
-  /* Delta palette */
   --delta-up: #22c55e;
   --delta-down: #ef4444;
   --delta-neutral: #6b7280;
 
-  /* ShadCN compatibility layer */
   --radius: 0.375rem;
   --card: var(--surface);
   --card-foreground: var(--foreground);
@@ -42,6 +38,45 @@
   --secondary-foreground: var(--foreground);
   --muted-background: var(--surface);
   --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --input: var(--border);
+  --ring: var(--accent);
+}
+
+/* ============================= */
+/* Light theme override          */
+/* ============================= */
+
+.light {
+  --background: #f5f4f1;
+  --foreground: #111111;
+  --surface: #ffffff;
+  --surface-raised: #f0efe9;
+  --border: #e0ddd8;
+  --border-subtle: #eceae5;
+  --accent: #2563eb;
+  --accent-dim: #1d4ed8;
+  --muted: #6b6b6b;
+  --muted-foreground: #8a8a8a;
+
+  --score-high: #16a34a;
+  --score-mid: #d97706;
+  --score-low: #dc2626;
+  --score-pf: #2563eb;
+  --score-authority: #d97706;
+  --score-reach: #ea6c1a;
+
+  --delta-up: #16a34a;
+  --delta-down: #dc2626;
+  --delta-neutral: #6b6b6b;
+
+  --card: var(--surface);
+  --card-foreground: var(--foreground);
+  --primary: var(--accent);
+  --primary-foreground: #ffffff;
+  --secondary: var(--surface-raised);
+  --secondary-foreground: var(--foreground);
+  --destructive: #dc2626;
   --destructive-foreground: #ffffff;
   --input: var(--border);
   --ring: var(--accent);
@@ -79,7 +114,7 @@ body {
   text-rendering: optimizeLegibility;
 }
 
-/* Subtle grid overlay */
+/* Subtle grid overlay — dark mode */
 body::before {
   content: "";
   position: fixed;
@@ -92,6 +127,13 @@ body::before {
   z-index: 0;
 }
 
+/* Grid overlay — light mode */
+.light body::before {
+  background-image:
+    linear-gradient(rgba(0, 0, 0, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
+}
+
 header {
   backdrop-filter: blur(8px);
 }
@@ -101,3 +143,8 @@ header {
 ::-webkit-scrollbar-track { background: #0a0a0a; }
 ::-webkit-scrollbar-thumb { background: #1f2937; border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: #374151; }
+
+/* Scrollbar — light mode */
+.light ::-webkit-scrollbar-track { background: #f5f4f1; }
+.light ::-webkit-scrollbar-thumb { background: #d0cdc8; }
+.light ::-webkit-scrollbar-thumb:hover { background: #b8b5b0; }
