@@ -32,7 +32,7 @@ export function pfScoreColor(score: number): string {
 export default function ActorCard({ actor, rank, delta }: ActorCardProps) {
   const scoreColor = pfScoreColor(actor.pfScore ?? 0);
   return (
-    <Link href={`/actors/${actor.id}`} className="block">
+    <Link href={`/actors/${actor.slug}`} className="block">
       <div className="bg-[#111111] border border-[#1f2937] rounded-lg p-4 hover:border-[#3b82f6]/50 transition-colors cursor-pointer">
         <div className="flex items-start justify-between gap-2">
           <div className="flex items-center gap-2 min-w-0">
