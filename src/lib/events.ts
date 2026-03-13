@@ -5,14 +5,14 @@ const EVENTS_DB_ID = process.env.NOTION_EVENTS_DB_ID ?? "70e9768bfcec49a9aa8565d
 export interface NotionEvent {
   id: string;
   name: string;
-  date: string;
-  eventType: string;
-  pfSignal: string;
+  date: string | null;
+  eventType: string | null;
+  pfSignal: string | null;
   description: string;
   actorIds: string[];
 }
 
-function parseEvent(page: Record<string, any>): NotionEvent {
+function parseEvent(page: Record<string, unknown>): NotionEvent {
   const p = page.properties ?? {};
   return {
     id: page.id as string,

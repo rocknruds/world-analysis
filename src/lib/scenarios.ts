@@ -19,17 +19,17 @@ export interface Scenario {
   actorIds: string[];
 }
 
-function parseScenario(page: Record<string, any>): Scenario {
-  const p = page.properties ?? {};
+function parseScenario(page: Record<string, unknown>): Scenario {
+  const p = (page.properties ?? {}) as Record<string, unknown>;
   const probNum = getNumber(p, "Probability Estimate");
   const probStr = getSelect(p, "Probability Estimate");
   return {
     id: page.id as string,
     name: getTitle(p, "Name"),
-    scenarioClass: getSelect(p, "Scenario Class"),
+    scenarioClass: getSelect(p, "Scenario Class") ?? "",
     probabilityEstimate: probNum ?? probStr ?? "",
-    triggerCondition: getText(p, "Trigger Condition"),
-    status: getSelect(p, "Status"),
+    triggerCondition: getText(p, "Trigger Condition") ?? "",
+    status: getSelect(p, "Status") ?? "",
     actorIds: getRelationIds(p, "Key Actors"),
   };
 }
