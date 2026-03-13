@@ -1,5 +1,5 @@
 import { getAllPublicActors } from "@/lib/actors";
-import { getRecentScoreMovers } from "@/lib/scores";
+import { getLatestDeltaByActor } from "@/lib/scores";
 import ActorTable from "@/components/ActorTable";
 
 export const revalidate = 300;
@@ -9,17 +9,14 @@ export const metadata = {
 };
 
 export default async function ActorsPage() {
-  const [actors, snapshots] = await Promise.all([
+  const [actors, deltaMap] = await Promise.all([
     getAllPublicActors(),
-    getRecentScoreMovers(50),
+    getLatestDeltaByActor(),
   ]);
-
-  // Build actorId → most recent delta map
+  
   const snapshotDeltaMap: Record<string, number> = {};
-  for (const s of snapshots) {
-    for (const id of s.actorIds) {
-      if (!(id in snapshotDeltaMap)) snapshotDeltaMap[id] = s.scoreDelta;
-    }
+  for (const [id, delta] of deltaMap.entries()) {
+    if (delta !== null) snapshotDeltaMap[id] = delta;
   }
 
   return (
