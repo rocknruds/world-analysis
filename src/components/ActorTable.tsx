@@ -65,7 +65,12 @@ export default function ActorTable({ actors, snapshotDeltaMap }: ActorTableProps
     result.sort((a, b) => {
       const dir = sortDir === "asc" ? 1 : -1;
       if (sortBy === "name") return dir * a.name.localeCompare(b.name);
-      return dir * (((a[sortBy] as number) ?? -1) - ((b[sortBy] as number) ?? -1));
+      const aVal = (a[sortBy] as number) ?? -1;
+      const bVal = (b[sortBy] as number) ?? -1;
+      if (aVal === bVal && sortBy === "pfScore") {
+        return dir * ((a.authorityScore ?? -1) - (b.authorityScore ?? -1));
+      }
+      return dir * (aVal - bVal);
     });
     return result;
   }, [actors, typeFilter, regionFilter, sortBy, sortDir]);
