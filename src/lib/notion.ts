@@ -131,3 +131,11 @@ export function getFormula(props: any, key: string): number | null {
 export function getUrl(props: any, key: string): string | null {
   return props[key]?.url ?? null
 }
+
+export function calcPFScore(
+  authority: number | null,
+  reach: number | null
+): number | null {
+  if (authority === null || reach === null) return null;
+  return Math.round(authority * 0.6 + reach * 0.4);
+}

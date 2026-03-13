@@ -4,9 +4,10 @@ import Link from "next/link";
 import { getAllPublicActors, getActorById } from "@/lib/actors";
 import { getActorScoreHistory } from "@/lib/scores";
 import { getActorEvents } from "@/lib/events";
+import type { NotionEvent } from "@/lib/events";
 import { getActorScenarios } from "@/lib/scenarios";
+import type { Scenario } from "@/lib/scenarios";
 import { calcPFScore } from "@/lib/notion";
-import PFScoreBar from "@/components/PFScoreBar";
 import ScoreDelta from "@/components/ScoreDelta";
 import ScoreChart from "@/components/ScoreChart";
 import { pfScoreColor, actorTypeBadgeColor } from "@/components/ActorCard";
@@ -28,11 +29,31 @@ export async function generateMetadata({
   return { title: actor?.name ?? "Actor Profile" };
 }
 
-function PFSignalBadge({ signal }: { signal: string }) {
+function MetaBadge({ children }: { children: React.ReactNode }) {
+  return (
+    <span className="text-xs text-gray-500 px-2 py-0.5 border border-[#1f2937] rounded">
+      {children}
+    </span>
+  );
+}
+
+function SectionLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="flex items-center gap-2 mb-4">
+      <span className="w-1 h-4 bg-[#3b82f6] rounded-full" />
+      <h2 className="text-xs font-semibold uppercase tracking-widest text-gray-400">
+        {children}
+      </h2>
+    </div>
+  );
+}
+
+function PFSignalBadge({ signal }: { signal: string | null }) {
   if (!signal) return null;
   const colors: Record<string, { text: string; bg: string }> = {
     Widening: { text: "#ef4444", bg: "#ef444415" },
     Narrowing: { text: "#22c55e", bg: "#22c55e15" },
+    Mixed: { text: "#f59e0b", bg: "#f59e0b15" },
     Stable: { text: "#6b7280", bg: "#6b728015" },
     Unclear: { text: "#eab308", bg: "#eab30815" },
   };
@@ -47,6 +68,28 @@ function PFSignalBadge({ signal }: { signal: string }) {
   );
 }
 
+function ScoreCell({
+  label,
+  value,
+  color,
+  sub,
+}: {
+  label: string;
+  value: number | null;
+  color: string;
+  sub?: string;
+}) {
+  return (
+    <div>
+      <p className="text-xs text-gray-500 mb-1">{label}</p>
+      <p className="text-3xl font-bold tabular-nums" style={{ color }}>
+        {value ?? "—"}
+      </p>
+      {sub && <p className="text-xs text-gray-600 mt-0.5">{sub}</p>}
+    </div>
+  );
+}
+
 export default async function ActorProfilePage({
   params,
 }: {
@@ -57,33 +100,45 @@ export default async function ActorProfilePage({
   const [actor, history, events, scenarios] = await Promise.all([
     getActorById(slug),
     getActorScoreHistory(slug),
-    getActorEvents(slug, 5),
+    getActorEvents(slug, 6),
     getActorScenarios(slug),
   ]);
 
   if (!actor) notFound();
 
   const pf = calcPFScore(actor.authorityScore, actor.reachScore);
-  const scoreColor = pfScoreColor(pf);
-  const latestDelta = history.length > 0 ? history[history.length - 1].scoreDelta : 0;
+  const scoreColor = pfScoreColor(pf ?? 0);
+  const latestSnapshot = history[history.length - 1];
+  const latestDelta = latestSnapshot?.delta ?? null;
+
+  // Format lastScored for display
+  const lastScoredFormatted = actor.lastScored
+    ? new Date(actor.lastScored).toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      })
+    : null;
 
   return (
     <div className="min-h-screen bg-[#0a0a0a]">
-      {/* Header */}
-      <div className="border-b border-[#1f2937] py-10">
-        <div className="max-w-5xl mx-auto px-6">
+      {/* ── Page header ─────────────────────────────────────────────── */}
+      <div className="border-b border-[#1f2937] py-8">
+        <div className="max-w-6xl mx-auto px-6">
           <Link
             href="/actors"
-            className="text-xs text-gray-600 hover:text-gray-400 transition-colors mb-4 inline-flex items-center gap-1"
+            className="text-xs text-gray-600 hover:text-gray-400 transition-colors mb-5 inline-flex items-center gap-1"
           >
             ← Actor Leaderboard
           </Link>
+
+          {/* Actor name + meta row */}
           <div className="flex items-start justify-between gap-4 flex-wrap">
             <div>
               <div className="flex items-center gap-2 mb-2 flex-wrap">
                 {actor.actorType && (
                   <span
-                    className="text-xs font-semibold px-2.5 py-1 rounded border"
+                    className="text-xs font-semibold px-2.5 py-0.5 rounded border"
                     style={{
                       color: actorTypeBadgeColor(actor.actorType),
                       borderColor: `${actorTypeBadgeColor(actor.actorType)}40`,
@@ -93,204 +148,202 @@ export default async function ActorProfilePage({
                     {actor.actorType}
                   </span>
                 )}
-                {actor.region && (
-                  <span className="text-xs text-gray-500 px-2 py-0.5 border border-[#1f2937] rounded">
-                    {actor.region}
-                  </span>
-                )}
+                {actor.region && <MetaBadge>{actor.region}</MetaBadge>}
                 {actor.iso3 && (
                   <span className="text-xs text-gray-600 font-mono">
                     {actor.iso3}
                   </span>
                 )}
+                {actor.pfVector && (
+                  <PFSignalBadge signal={actor.pfVector} />
+                )}
               </div>
-              <h1 className="text-4xl font-bold text-white">
+              <h1 className="text-4xl font-bold text-white tracking-tight">
                 {actor.name}
               </h1>
+              {actor.subType && (
+                <p className="text-sm text-gray-500 mt-1">{actor.subType}</p>
+              )}
             </div>
-            <div className="flex items-center gap-3">
-              <span
-                className="text-5xl font-bold tabular-nums"
-                style={{ color: scoreColor }}
-              >
-                {pf || "—"}
-              </span>
-              {latestDelta !== 0 && <ScoreDelta delta={latestDelta} />}
-            </div>
+
+            {latestDelta !== null && (
+              <div className="flex flex-col items-end gap-1">
+                <ScoreDelta delta={latestDelta} className="text-base" />
+                <span className="text-xs text-gray-600">recent Δ</span>
+              </div>
+            )}
           </div>
         </div>
       </div>
 
-      <div className="max-w-5xl mx-auto px-6 py-10 space-y-10">
-        {/* PF Score Breakdown */}
-        <section className="bg-[#111111] border border-[#1f2937] rounded-xl p-6">
-          <div className="flex items-center gap-2 mb-5">
-            <span className="w-1 h-4 bg-[#3b82f6] rounded-full" />
-            <h2 className="text-xs font-semibold uppercase tracking-widest text-gray-400">
-              PF Score Breakdown
-            </h2>
-          </div>
-          <PFScoreBar
-            authority={actor.authorityScore}
-            reach={actor.reachScore}
-            pf={pf}
-          />
-          <div className="mt-5 pt-5 border-t border-[#1f2937] grid grid-cols-3 gap-4 text-center">
-            <div>
-              <p className="text-xs text-gray-500 mb-1">Authority</p>
-              <p className="text-2xl font-bold text-[#60a5fa] tabular-nums">
-                {actor.authorityScore || "—"}
-              </p>
-              <p className="text-xs text-gray-600 mt-0.5">× 0.6 weight</p>
-            </div>
-            <div>
-              <p className="text-xs text-gray-500 mb-1">Reach</p>
-              <p className="text-2xl font-bold text-[#f97316] tabular-nums">
-                {actor.reachScore || "—"}
-              </p>
-              <p className="text-xs text-gray-600 mt-0.5">× 0.4 weight</p>
-            </div>
-            <div>
-              <p className="text-xs text-gray-500 mb-1">PF Score</p>
-              <p
-                className="text-2xl font-bold tabular-nums"
-                style={{ color: scoreColor }}
-              >
-                {pf || "—"}
-              </p>
-              {actor.pfVector && (
-                <p className="text-xs text-gray-600 mt-0.5">{actor.pfVector}</p>
+      {/* ── Main content ────────────────────────────────────────────── */}
+      <div className="max-w-6xl mx-auto px-6 py-10 space-y-8">
+
+        {/* ── Hero: scores (left) + chart (right) ─────────────────── */}
+        <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-6">
+
+          {/* Score panel */}
+          <div className="bg-[#111111] border border-[#1f2937] rounded-xl p-6 flex flex-col gap-6">
+            <ScoreCell
+              label="PF Score"
+              value={pf}
+              color={scoreColor}
+              sub="Authority × 0.6 + Reach × 0.4"
+            />
+            <div className="w-full h-px bg-[#1f2937]" />
+            <ScoreCell
+              label="Authority Score"
+              value={actor.authorityScore}
+              color="#f59e0b"
+              sub="Capacity to coerce"
+            />
+            <ScoreCell
+              label="Reach Score"
+              value={actor.reachScore}
+              color="#f97316"
+              sub="Influence projection"
+            />
+
+            {/* Metadata footer */}
+            <div className="mt-auto pt-4 border-t border-[#1f2937] space-y-2">
+              {actor.proxyDepth && (
+                <div className="flex justify-between items-center">
+                  <span className="text-xs text-gray-600">Depth</span>
+                  <span className="text-xs text-gray-400">{actor.proxyDepth}</span>
+                </div>
+              )}
+              {actor.capabilities.length > 0 && (
+                <div className="flex flex-wrap gap-1 mt-1">
+                  {actor.capabilities.slice(0, 4).map((cap) => (
+                    <span
+                      key={cap}
+                      className="text-[10px] px-1.5 py-0.5 rounded bg-[#1f2937] text-gray-500"
+                    >
+                      {cap}
+                    </span>
+                  ))}
+                </div>
               )}
             </div>
           </div>
-        </section>
 
-        {/* Score History Chart */}
-        <section className="bg-[#111111] border border-[#1f2937] rounded-xl p-6">
-          <div className="flex items-center gap-2 mb-5">
-            <span className="w-1 h-4 bg-[#3b82f6] rounded-full" />
-            <h2 className="text-xs font-semibold uppercase tracking-widest text-gray-400">
-              Score History
-            </h2>
+          {/* Chart panel */}
+          <div className="bg-[#111111] border border-[#1f2937] rounded-xl p-6">
+            <SectionLabel>Score Trajectory</SectionLabel>
+            <ScoreChart snapshots={history} />
           </div>
-          <ScoreChart snapshots={history} />
-        </section>
+        </div>
 
-        {/* Recent Events */}
-        <section>
-          <div className="flex items-center gap-2 mb-4">
-            <span className="w-1 h-4 bg-[#3b82f6] rounded-full" />
-            <h2 className="text-xs font-semibold uppercase tracking-widest text-gray-400">
-              Recent Events
-            </h2>
-          </div>
-          {events.length === 0 ? (
-            <div className="rounded-lg border border-[#1f2937] bg-[#111111] px-5 py-8 text-center text-sm text-gray-600">
-              No linked events found.
+        {/* ── Score Reasoning ──────────────────────────────────────── */}
+        {actor.scoreReasoning && (
+          <div className="bg-[#111111] border border-[#1f2937] rounded-xl p-6">
+            <div className="flex items-start justify-between gap-4 mb-4">
+              <SectionLabel>Score Reasoning</SectionLabel>
+              {lastScoredFormatted && (
+                <span className="text-xs text-gray-600 whitespace-nowrap">
+                  Last scored {lastScoredFormatted}
+                </span>
+              )}
             </div>
-          ) : (
-            <div className="space-y-2">
-              {events.map((event) => (
-                <div
-                  key={event.id}
-                  className="bg-[#111111] border border-[#1f2937] rounded-lg p-4"
-                >
-                  <div className="flex items-start justify-between gap-3 flex-wrap">
-                    <div className="min-w-0">
-                      <p className="text-sm font-semibold text-white">
-                        {event.name || "Unnamed Event"}
+            {/*
+              NOTE: scoreReasoning currently pulls from Actor.scoreReasoning (Score Reasoning field).
+              Future migration path: replace with the most recent PowerFlow Assessment for this actor
+              (from the PowerFlow Assessments DB, filtered by Actor relation field).
+              That's the intended long-term home for this content — period-specific analytical snapshots
+              written by the assessment agent. The data structure is already there (e6a475420b96467ab43e77632f7a7032).
+            */}
+            <p className="text-sm text-gray-300 leading-relaxed whitespace-pre-line">
+              {actor.scoreReasoning}
+            </p>
+          </div>
+        )}
+
+        {/* ── Events + Scenarios row ────────────────────────────────── */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+          {/* Recent Events */}
+          <div>
+            <SectionLabel>Recent Events</SectionLabel>
+            {events.length === 0 ? (
+              <div className="rounded-lg border border-[#1f2937] bg-[#111111] px-5 py-8 text-center text-sm text-gray-600">
+                No linked events found.
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {events.map((event: NotionEvent) => (
+                  <div
+                    key={event.id}
+                    className="rounded-lg border border-[#1f2937] bg-[#111111] px-4 py-3"
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <p className="text-sm text-white font-medium leading-snug">
+                        {event.name || "—"}
                       </p>
-                      {event.description && (
-                        <p className="text-xs text-gray-500 mt-1 line-clamp-2">
-                          {event.description}
-                        </p>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-2 shrink-0 flex-wrap">
                       {event.date && (
-                        <span className="text-xs text-gray-600 tabular-nums">
+                        <span className="text-xs text-gray-600 whitespace-nowrap shrink-0">
                           {new Date(event.date).toLocaleDateString("en-US", {
                             month: "short",
-                            day: "numeric",
                             year: "numeric",
                           })}
                         </span>
                       )}
-                      {event.eventType && (
-                        <span className="text-xs px-2 py-0.5 rounded border border-[#1f2937] text-gray-400">
-                          {event.eventType}
-                        </span>
-                      )}
-                      <PFSignalBadge signal={event.pfSignal} />
                     </div>
+                    {event.pfSignal && (
+                      <span className="mt-1 inline-block text-[10px] px-1.5 py-0.5 rounded bg-[#1f2937] text-gray-500">
+                        {event.pfSignal}
+                      </span>
+                    )}
+                    {event.description && (
+                      <p className="text-xs text-gray-500 mt-1.5 leading-relaxed line-clamp-2">
+                        {event.description}
+                      </p>
+                    )}
                   </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </section>
+                ))}
+              </div>
+            )}
+          </div>
 
-        {/* Active Scenarios */}
-        {scenarios.length > 0 && (
-          <section>
-            <div className="flex items-center gap-2 mb-4">
-              <span className="w-1 h-4 bg-[#3b82f6] rounded-full" />
-              <h2 className="text-xs font-semibold uppercase tracking-widest text-gray-400">
-                Active Scenarios
-              </h2>
-            </div>
-            <div className="space-y-2">
-              {scenarios.map((s) => (
-                <div
-                  key={s.id}
-                  className="bg-[#111111] border border-[#1f2937] rounded-lg p-4"
-                >
-                  <div className="flex items-start justify-between gap-3 mb-1">
-                    <p className="text-sm font-semibold text-white">
-                      {s.name}
-                    </p>
-                    {s.probabilityEstimate !== "" &&
-                      s.probabilityEstimate !== 0 && (
-                        <span className="text-xs font-bold px-2 py-0.5 rounded bg-[#3b82f6]/15 text-[#60a5fa] border border-[#3b82f6]/30 tabular-nums shrink-0">
-                          {typeof s.probabilityEstimate === "number"
-                            ? `${s.probabilityEstimate}%`
-                            : s.probabilityEstimate}
+          {/* Active Scenarios */}
+          <div>
+            <SectionLabel>Active Scenarios</SectionLabel>
+            {!scenarios || scenarios.length === 0 ? (
+              <div className="rounded-lg border border-[#1f2937] bg-[#111111] px-5 py-8 text-center text-sm text-gray-600">
+                No active scenarios linked.
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {scenarios.map((s: Scenario) => (
+                  <div
+                    key={s.id}
+                    className="rounded-lg border border-[#1f2937] bg-[#111111] px-4 py-3"
+                  >
+                    <div className="flex items-center justify-between gap-2 mb-1">
+                      <p className="text-sm text-white font-medium leading-snug">
+                        {s.name || "—"}
+                      </p>
+                      {s.probabilityEstimate !== null && (
+                        <span className="text-xs font-semibold tabular-nums text-[#3b82f6]">
+                          {s.probabilityEstimate}%
                         </span>
                       )}
+                    </div>
+                    {s.scenarioClass && (
+                      <span className="text-[10px] text-gray-600 uppercase tracking-wide">
+                        {s.scenarioClass}
+                      </span>
+                    )}
+                    {s.triggerCondition && (
+                      <p className="text-xs text-gray-500 mt-1.5 leading-relaxed line-clamp-2">
+                        {s.triggerCondition}
+                      </p>
+                    )}
                   </div>
-                  {s.scenarioClass && (
-                    <span className="text-xs text-gray-600 font-medium uppercase tracking-wide">
-                      {s.scenarioClass}
-                    </span>
-                  )}
-                  {s.triggerCondition && (
-                    <p className="text-xs text-gray-500 mt-2 leading-relaxed">
-                      {s.triggerCondition.slice(0, 100)}
-                      {s.triggerCondition.length > 100 && "…"}
-                    </p>
-                  )}
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
-
-        {/* Notes */}
-        {actor.notes && (
-          <section>
-            <div className="flex items-center gap-2 mb-4">
-              <span className="w-1 h-4 bg-[#3b82f6] rounded-full" />
-              <h2 className="text-xs font-semibold uppercase tracking-widest text-gray-400">
-                Notes
-              </h2>
-            </div>
-            <div className="bg-[#111111] border border-[#1f2937] rounded-xl p-6">
-              <p className="text-sm text-gray-300 leading-relaxed whitespace-pre-wrap">
-                {actor.notes}
-              </p>
-            </div>
-          </section>
-        )}
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );

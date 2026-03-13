@@ -1,8 +1,9 @@
 interface ScoreDeltaProps {
   delta: number;
+  className?: string;
 }
 
-export default function ScoreDelta({ delta }: ScoreDeltaProps) {
+export default function ScoreDelta({ delta, className }: ScoreDeltaProps) {
   if (!delta || delta === 0) return null;
   const positive = delta > 0;
   return (
@@ -11,7 +12,7 @@ export default function ScoreDelta({ delta }: ScoreDeltaProps) {
         positive
           ? "text-[#22c55e] bg-[#22c55e]/10"
           : "text-[#ef4444] bg-[#ef4444]/10"
-      }`}
+      } ${className ?? ""}`}
     >
       {positive ? "▲" : "▼"}
       {Math.abs(delta)}

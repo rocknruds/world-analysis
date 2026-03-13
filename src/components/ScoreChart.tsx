@@ -1,16 +1,15 @@
 "use client";
 
 import {
-  ResponsiveContainer,
   LineChart,
   Line,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
+  ResponsiveContainer,
+  ReferenceDot,
   Legend,
-  ReferenceLine,
-  Dot,
 } from "recharts";
 import type { ScoreHistoryPoint } from "@/lib/types";
 
@@ -18,123 +17,89 @@ interface ScoreChartProps {
   snapshots: ScoreHistoryPoint[];
 }
 
-function formatDate(dateStr: string): string {
-  const d = new Date(dateStr);
-  return d.toLocaleDateString("en-US", { month: "short", year: "2-digit" });
+interface TooltipEntry {
+  dataKey: string;
+  name: string;
+  color: string;
+  value: number | null;
+  payload: ScoreHistoryPoint;
 }
 
-// Custom tooltip — shows all three scores + annotation if present
-function CustomTooltip({
-  active,
-  payload,
-  label,
-}: {
+interface CustomTooltipProps {
   active?: boolean;
-  payload?: any[];
+  payload?: TooltipEntry[];
   label?: string;
-}) {
-  if (!active || !payload?.length) return null;
+}
 
-  const annotation = payload[0]?.payload?.annotation;
-  const date = payload[0]?.payload?.date;
+function formatDate(dateStr: string): string {
+  const d = new Date(dateStr);
+  return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "2-digit" });
+}
 
+function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
+  if (!active || !payload || !payload.length) return null;
+  const point = payload[0]?.payload as ScoreHistoryPoint;
   return (
-    <div
-      className="rounded-lg border border-[#1f2937] bg-[#0f0f0f] p-3 text-xs shadow-xl max-w-xs"
-      style={{ backdropFilter: "blur(8px)" }}
-    >
-      <p className="text-gray-400 mb-2 font-medium">
-        {date
-          ? new Date(date).toLocaleDateString("en-US", {
-              month: "long",
-              day: "numeric",
-              year: "numeric",
-            })
-          : label}
-      </p>
-      <div className="space-y-1">
-        {payload.map((entry: any) => (
-          <div key={entry.dataKey} className="flex items-center gap-2">
-            <span
-              className="w-2 h-2 rounded-full shrink-0"
-              style={{ backgroundColor: entry.color }}
-            />
-            <span className="text-gray-400">{entry.name}:</span>
-            <span className="font-bold tabular-nums" style={{ color: entry.color }}>
-              {entry.value ?? "—"}
+    <div className="bg-[#1a1a1a] border border-[#2d3748] rounded-lg p-3 max-w-[260px] shadow-xl">
+      <p className="text-xs text-gray-500 mb-2">{label ? formatDate(label) : ""}</p>
+      <div className="space-y-1 mb-2">
+        {payload.map((entry: TooltipEntry) => (
+          <div key={entry.dataKey} className="flex items-center justify-between gap-4">
+            <span className="text-xs" style={{ color: entry.color }}>
+              {entry.name}
+            </span>
+            <span className="text-xs font-semibold tabular-nums" style={{ color: entry.color }}>
+              {entry.value !== null ? entry.value : "—"}
             </span>
           </div>
         ))}
       </div>
-      {annotation && (
-        <p className="mt-2 pt-2 border-t border-[#1f2937] text-gray-500 leading-relaxed line-clamp-4">
-          {annotation}
+      {point?.annotation && (
+        <p className="text-xs text-gray-400 border-t border-[#2d3748] pt-2 leading-relaxed">
+          {point.annotation.length > 180
+            ? point.annotation.slice(0, 180) + "…"
+            : point.annotation}
         </p>
+      )}
+      {point?.delta !== null && point?.delta !== undefined && (
+        <div className="mt-1.5 border-t border-[#2d3748] pt-1.5">
+          <span
+            className="text-xs font-semibold tabular-nums"
+            style={{ color: (point.delta ?? 0) >= 0 ? "#22c55e" : "#ef4444" }}
+          >
+            {(point.delta ?? 0) >= 0 ? "+" : ""}
+            {point.delta?.toFixed(1)} Δ
+          </span>
+        </div>
       )}
     </div>
   );
 }
 
-// Dot that highlights annotated points (event-triggered snapshots)
-function AnnotatedDot(props: any) {
-  const { cx, cy, payload, stroke } = props;
-  if (!payload?.annotation) return <Dot {...props} r={2} />;
-  return (
-    <g>
-      <circle cx={cx} cy={cy} r={5} fill={stroke} opacity={0.2} />
-      <circle cx={cx} cy={cy} r={3} fill={stroke} />
-    </g>
-  );
-}
-
 export default function ScoreChart({ snapshots }: ScoreChartProps) {
-  if (!snapshots || snapshots.length === 0) {
+  if (snapshots.length === 0) {
     return (
-      <div className="flex items-center justify-center h-48 text-sm text-gray-600">
+      <div className="h-48 flex items-center justify-center text-sm text-gray-600">
         No score history available yet.
       </div>
     );
   }
 
-  // Single point — recharts needs at least 2 points to draw lines
-  // Pad with a ghost point 30 days earlier so it renders
-  const data =
-    snapshots.length === 1
-      ? [
-          {
-            ...snapshots[0],
-            date: new Date(
-              new Date(snapshots[0].date).getTime() - 30 * 24 * 60 * 60 * 1000
-            )
-              .toISOString()
-              .split("T")[0],
-            pfScore: snapshots[0].pfScore,
-            authorityScore: snapshots[0].authorityScore,
-            reachScore: snapshots[0].reachScore,
-            annotation: null,
-          },
-          snapshots[0],
-        ]
-      : snapshots;
-
-  // Determine which lines have any non-null data
-  const hasAuthority = data.some((d) => d.authorityScore !== null);
-  const hasReach = data.some((d) => d.reachScore !== null);
-
-  // Compute Y-axis domain with padding
-  const allValues = data.flatMap((d) =>
-    [d.pfScore, d.authorityScore, d.reachScore].filter(
-      (v): v is number => v !== null
-    )
+  // Find annotated points (event-triggered snapshots with notes) to mark on chart
+  const annotatedPoints = snapshots.filter(
+    (s) => s.annotation && s.snapshotType === "Event-Triggered"
   );
-  const minVal = Math.max(0, Math.floor(Math.min(...allValues) / 10) * 10 - 10);
-  const maxVal = Math.min(100, Math.ceil(Math.max(...allValues) / 10) * 10 + 5);
+
+  // Check if we have component scores to show
+  const hasComponentScores = snapshots.some(
+    (s) => s.authorityScore !== null || s.reachScore !== null
+  );
 
   return (
     <div className="w-full">
-      <ResponsiveContainer width="100%" height={260}>
+      <ResponsiveContainer width="100%" height={220}>
         <LineChart
-          data={data}
+          data={snapshots}
           margin={{ top: 8, right: 8, bottom: 0, left: -16 }}
         >
           <CartesianGrid
@@ -146,24 +111,27 @@ export default function ScoreChart({ snapshots }: ScoreChartProps) {
             dataKey="date"
             tickFormatter={formatDate}
             tick={{ fill: "#6b7280", fontSize: 10 }}
-            axisLine={{ stroke: "#1f2937" }}
+            axisLine={false}
             tickLine={false}
-            minTickGap={40}
+            interval="preserveStartEnd"
           />
           <YAxis
-            domain={[minVal, maxVal]}
+            domain={[0, 100]}
             tick={{ fill: "#6b7280", fontSize: 10 }}
             axisLine={false}
             tickLine={false}
-            width={32}
+            width={28}
           />
           <Tooltip content={<CustomTooltip />} />
-          <Legend
-            wrapperStyle={{ fontSize: "11px", paddingTop: "12px" }}
-            formatter={(value) => (
-              <span style={{ color: "#9ca3af" }}>{value}</span>
-            )}
-          />
+          {hasComponentScores && (
+            <Legend
+              formatter={(value) => (
+                <span style={{ color: "#9ca3af", fontSize: 11 }}>{value}</span>
+              )}
+              iconType="plainline"
+              wrapperStyle={{ paddingTop: 12 }}
+            />
+          )}
 
           {/* PF Score — primary line, always shown */}
           <Line
@@ -172,70 +140,73 @@ export default function ScoreChart({ snapshots }: ScoreChartProps) {
             name="PF Score"
             stroke="#3b82f6"
             strokeWidth={2.5}
-            dot={<AnnotatedDot stroke="#3b82f6" />}
-            activeDot={{ r: 5, fill: "#3b82f6" }}
-            connectNulls
+            dot={false}
+            activeDot={{ r: 4, fill: "#3b82f6", strokeWidth: 0 }}
+            connectNulls={false}
           />
 
-          {/* Authority Score — only if data exists */}
-          {hasAuthority && (
+          {/* Authority — secondary line, only if data exists */}
+          {hasComponentScores && (
             <Line
               type="monotone"
               dataKey="authorityScore"
               name="Authority"
-              stroke="#60a5fa"
+              stroke="#f59e0b"
               strokeWidth={1.5}
-              strokeDasharray="4 2"
               dot={false}
-              activeDot={{ r: 4, fill: "#60a5fa" }}
-              connectNulls
+              activeDot={{ r: 3, fill: "#f59e0b", strokeWidth: 0 }}
+              strokeDasharray="4 2"
+              connectNulls={false}
             />
           )}
 
-          {/* Reach Score — only if data exists */}
-          {hasReach && (
+          {/* Reach — tertiary line, only if data exists */}
+          {hasComponentScores && (
             <Line
               type="monotone"
               dataKey="reachScore"
               name="Reach"
               stroke="#f97316"
               strokeWidth={1.5}
-              strokeDasharray="4 2"
               dot={false}
-              activeDot={{ r: 4, fill: "#f97316" }}
-              connectNulls
+              activeDot={{ r: 3, fill: "#f97316", strokeWidth: 0 }}
+              strokeDasharray="2 3"
+              connectNulls={false}
             />
           )}
 
-          {/* Tier reference lines — subtle orientation markers */}
-          <ReferenceLine y={80} stroke="#374151" strokeDasharray="2 4" />
-          <ReferenceLine y={60} stroke="#374151" strokeDasharray="2 4" />
-          <ReferenceLine y={40} stroke="#374151" strokeDasharray="2 4" />
-          <ReferenceLine y={25} stroke="#374151" strokeDasharray="2 4" />
+          {/* Annotated event dots — visible markers for inflection points */}
+          {annotatedPoints.map((pt, i) => (
+            <ReferenceDot
+              key={i}
+              x={pt.date}
+              y={pt.pfScore}
+              r={5}
+              fill="#3b82f6"
+              stroke="#0a0a0a"
+              strokeWidth={2}
+            />
+          ))}
         </LineChart>
       </ResponsiveContainer>
 
-      {/* Tier legend */}
-      <div className="flex items-center gap-4 mt-3 flex-wrap">
-        {[
-          { label: "Tier 1", range: "80+", color: "#22c55e" },
-          { label: "Tier 2", range: "60–79", color: "#84cc16" },
-          { label: "Tier 3", range: "40–59", color: "#eab308" },
-          { label: "Tier 4–5", range: "25–39", color: "#f97316" },
-          { label: "Tier 6–7", range: "<25", color: "#ef4444" },
-        ].map((t) => (
-          <div key={t.label} className="flex items-center gap-1.5">
-            <span
-              className="w-2 h-2 rounded-full"
-              style={{ backgroundColor: t.color }}
-            />
-            <span className="text-xs text-gray-600">
-              {t.label}{" "}
-              <span className="text-gray-700">({t.range})</span>
-            </span>
-          </div>
-        ))}
-      </div>
+      {/* Annotation index — events listed below chart */}
+      {annotatedPoints.length > 0 && (
+        <div className="mt-4 space-y-2 border-t border-[#1f2937] pt-4">
+          {annotatedPoints.map((pt, i) => (
+            <div key={i} className="flex gap-3 items-start">
+              <span className="text-xs text-[#3b82f6] font-mono whitespace-nowrap mt-0.5">
+                {formatDate(pt.date)}
+              </span>
+              <p className="text-xs text-gray-500 leading-relaxed">
+                {pt.annotation!.length > 200
+                  ? pt.annotation!.slice(0, 200) + "…"
+                  : pt.annotation}
+              </p>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
