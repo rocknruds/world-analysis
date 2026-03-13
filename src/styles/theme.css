@@ -3,52 +3,52 @@
 :root {
   --font-size: 16px;
   
-  /* PowerFlow Light Mode Colors */
-  --background: #f5f4f0;
-  --foreground: #1a1918;
-  --card: #ffffff;
-  --card-foreground: #1a1918;
-  --popover: #ffffff;
-  --popover-foreground: #1a1918;
-  --primary: #2563eb;
+  /* PowerFlow Light Mode Colors - Softer Version */
+  --background: #f8f7f4;
+  --foreground: #3a3938;
+  --card: #fdfcfa;
+  --card-foreground: #3a3938;
+  --popover: #fdfcfa;
+  --popover-foreground: #3a3938;
+  --primary: #5b8def;
   --primary-foreground: #ffffff;
-  --secondary: #efede8;
-  --secondary-foreground: #1a1918;
-  --muted: #efede8;
-  --muted-foreground: #6b6b68;
-  --accent: #2563eb;
+  --secondary: #f1efe9;
+  --secondary-foreground: #3a3938;
+  --muted: #f1efe9;
+  --muted-foreground: #7a7977;
+  --accent: #5b8def;
   --accent-foreground: #ffffff;
-  --destructive: #dc2626;
+  --destructive: #e57373;
   --destructive-foreground: #ffffff;
-  --border: #dedad4;
+  --border: #e8e6e0;
   --input: transparent;
-  --input-background: #ffffff;
-  --switch-background: #dedad4;
+  --input-background: #fdfcfa;
+  --switch-background: #e8e6e0;
   --font-weight-medium: 500;
   --font-weight-normal: 400;
-  --ring: #2563eb;
+  --ring: #5b8def;
   
-  /* Score colors - light mode */
-  --score-high: #16a34a;
-  --score-mid: #d97706;
-  --score-low: #dc2626;
-  --score-authority: #d97706;
-  --score-reach: #f97316;
+  /* Score colors - light mode - softer */
+  --score-high: #4caf50;
+  --score-mid: #f9a825;
+  --score-low: #e57373;
+  --score-authority: #f9a825;
+  --score-reach: #ff8a65;
   
-  --chart-1: #2563eb;
-  --chart-2: #16a34a;
-  --chart-3: #d97706;
-  --chart-4: #dc2626;
-  --chart-5: #f97316;
+  --chart-1: #5b8def;
+  --chart-2: #4caf50;
+  --chart-3: #f9a825;
+  --chart-4: #e57373;
+  --chart-5: #ff8a65;
   --radius: 0.375rem;
-  --sidebar: #ffffff;
-  --sidebar-foreground: #1a1918;
-  --sidebar-primary: #2563eb;
+  --sidebar: #fdfcfa;
+  --sidebar-foreground: #3a3938;
+  --sidebar-primary: #5b8def;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #efede8;
-  --sidebar-accent-foreground: #1a1918;
-  --sidebar-border: #dedad4;
-  --sidebar-ring: #2563eb;
+  --sidebar-accent: #f1efe9;
+  --sidebar-accent-foreground: #3a3938;
+  --sidebar-border: #e8e6e0;
+  --sidebar-ring: #5b8def;
 }
 
 .dark {

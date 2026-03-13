@@ -20,7 +20,7 @@ export default function App() {
   return (
     <div className="min-h-screen bg-background text-foreground relative overflow-hidden">
       {/* Subtle grid overlay */}
-      <div className="fixed inset-0 pointer-events-none opacity-[0.03] dark:opacity-[0.02]" 
+      <div className="fixed inset-0 pointer-events-none opacity-[0.015] dark:opacity-[0.015]" 
            style={{
              backgroundImage: `linear-gradient(${isDark ? '#3b82f6' : '#6b6b68'} 1px, transparent 1px), linear-gradient(90deg, ${isDark ? '#3b82f6' : '#6b6b68'} 1px, transparent 1px)`,
              backgroundSize: '32px 32px'
