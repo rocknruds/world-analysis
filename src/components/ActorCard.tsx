@@ -10,54 +10,46 @@ interface ActorCardProps {
 
 export function actorTypeBadgeColor(type: string): string {
   switch (type) {
-    case "State":
-      return "#60a5fa";
-    case "Non-State":
-      return "#fb923c";
-    case "Hybrid":
-      return "#a78bfa";
-    case "IGO":
-      return "#34d399";
-    default:
-      return "#9ca3af";
+    case "State": return "#60a5fa";
+    case "Non-State": return "#fb923c";
+    case "Hybrid": return "#a78bfa";
+    case "IGO": return "#34d399";
+    default: return "#9ca3af";
   }
 }
 
 export function pfScoreColor(score: number): string {
-  if (score >= 70) return "#22c55e";
-  if (score >= 40) return "#eab308";
-  return "#ef4444";
+  if (score >= 70) return "var(--score-high)";
+  if (score >= 40) return "var(--score-mid)";
+  return "var(--score-low)";
 }
 
 export default function ActorCard({ actor, rank, delta }: ActorCardProps) {
   const scoreColor = pfScoreColor(actor.pfScore ?? 0);
   return (
     <Link href={`/actors/${actor.slug}`} className="block">
-      <div className="bg-[#111111] border border-[#1f2937] rounded-lg p-4 hover:border-[#3b82f6]/50 transition-colors cursor-pointer">
+      <div
+        className="rounded-lg p-4 transition-colors cursor-pointer"
+        style={{ backgroundColor: "var(--surface)", border: "1px solid var(--border)" }}
+      >
         <div className="flex items-start justify-between gap-2">
           <div className="flex items-center gap-2 min-w-0">
             {rank !== undefined && (
-              <span className="text-xs text-gray-500 w-5 shrink-0 tabular-nums">
+              <span className="text-xs w-5 shrink-0 tabular-nums" style={{ color: "var(--muted)" }}>
                 #{rank}
               </span>
             )}
             <div className="min-w-0">
-              <p className="text-sm font-semibold text-white truncate">
+              <p className="text-sm font-semibold truncate" style={{ color: "var(--foreground)" }}>
                 {actor.name || "Unknown"}
               </p>
-              <span
-                className="text-xs font-medium"
-                style={{ color: actorTypeBadgeColor(actor.actorType) }}
-              >
+              <span className="text-xs font-medium" style={{ color: actorTypeBadgeColor(actor.actorType) }}>
                 {actor.actorType || "—"}
               </span>
             </div>
           </div>
           <div className="flex items-center gap-1.5 shrink-0">
-            <span
-              className="text-xl font-bold tabular-nums"
-              style={{ color: scoreColor }}
-            >
+            <span className="text-xl font-bold tabular-nums" style={{ color: scoreColor }}>
               {actor.pfScore !== null ? actor.pfScore : "—"}
             </span>
             {delta !== undefined && <ScoreDelta delta={delta} />}

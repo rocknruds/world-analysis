@@ -12,8 +12,8 @@ export const revalidate = 300;
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex items-center gap-3 mb-6">
-      <span className="w-1 h-4 bg-[#3b82f6] rounded-full" />
-      <h2 className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-400">
+      <span className="w-1 h-4 rounded-full" style={{ backgroundColor: "var(--accent)" }} />
+      <h2 className="text-xs font-semibold uppercase tracking-[0.18em]" style={{ color: "var(--muted)" }}>
         {children}
       </h2>
     </div>
@@ -22,7 +22,10 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
 
 function EmptyState({ message }: { message: string }) {
   return (
-    <div className="rounded-lg border border-[#1f2937] bg-[#111111] px-6 py-10 text-center text-sm text-gray-600">
+    <div
+      className="rounded-lg px-6 py-10 text-center text-sm"
+      style={{ border: "1px solid var(--border)", backgroundColor: "var(--surface)", color: "var(--muted)" }}
+    >
       {message}
     </div>
   );
@@ -39,47 +42,46 @@ export default async function HomePage() {
   const enrichedActors = enrichActorsWithDeltas(actors, deltaMap);
   const top10 = enrichedActors.slice(0, 10);
 
-  // Delta record for ActorCard (id → delta number)
   const deltaRecord: Record<string, number> = {};
   for (const [id, delta] of deltaMap.entries()) {
     if (delta !== null) deltaRecord[id] = delta;
   }
 
-  // Top movers — gainers and fallers combined, sorted by absolute delta
   const { gainers, fallers } = computeScoreMovers(enrichedActors, 5);
   const movers = [...gainers, ...fallers]
     .sort((a, b) => Math.abs(b.delta) - Math.abs(a.delta))
     .slice(0, 5);
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white">
-      {/* ── Hero ──────────────────────────────────────────────── */}
-      <section className="border-b border-[#1f2937] py-16 md:py-20">
+    <div className="min-h-screen" style={{ backgroundColor: "var(--background)", color: "var(--foreground)" }}>
+      {/* ── Hero ─────────────────────────────────────────────── */}
+      <section className="py-16 md:py-20" style={{ borderBottom: "1px solid var(--border)" }}>
         <div className="max-w-7xl mx-auto px-6">
           <div className="max-w-2xl">
             <div className="flex items-center gap-2 mb-5">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#3b82f6] animate-pulse" />
-              <span className="text-xs font-medium tracking-widest uppercase text-[#3b82f6]">
+              <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ backgroundColor: "var(--accent)" }} />
+              <span className="text-xs font-medium tracking-widest uppercase" style={{ color: "var(--accent)" }}>
                 PowerFlow Lab
               </span>
             </div>
-            <h1 className="text-5xl md:text-6xl font-bold tracking-tight text-white leading-tight mb-5">
+            <h1 className="text-5xl md:text-6xl font-bold tracking-tight leading-tight mb-5" style={{ color: "var(--foreground)" }}>
               PowerFlow
             </h1>
-            <p className="text-lg text-gray-400 leading-relaxed max-w-xl">
-              We don&apos;t analyze what governments claim. We analyze where
-              power actually moves.
+            <p className="text-lg leading-relaxed max-w-xl" style={{ color: "var(--muted)" }}>
+              We don&apos;t analyze what governments claim. We analyze where power actually moves.
             </p>
             <div className="flex items-center gap-4 mt-8">
               <Link
                 href="/actors"
-                className="px-5 py-2.5 bg-[#3b82f6] hover:bg-[#2563eb] text-white text-sm font-semibold rounded-lg transition-colors"
+                className="px-5 py-2.5 text-sm font-semibold rounded-lg transition-colors text-white"
+                style={{ backgroundColor: "var(--accent)" }}
               >
                 Actor Leaderboard
               </Link>
               <Link
                 href="/briefs"
-                className="px-5 py-2.5 border border-[#1f2937] hover:border-[#3b82f6]/50 text-gray-300 hover:text-white text-sm font-semibold rounded-lg transition-colors"
+                className="px-5 py-2.5 text-sm font-semibold rounded-lg transition-colors"
+                style={{ border: "1px solid var(--border)", color: "var(--muted-foreground)" }}
               >
                 Latest Briefs
               </Link>
@@ -88,27 +90,25 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ── Score Movers Strip ────────────────────────────────── */}
+      {/* ── Score Movers Strip ───────────────────────────────── */}
       {movers.length > 0 && (
-        <section className="border-b border-[#1f2937] py-6">
+        <section className="py-6" style={{ borderBottom: "1px solid var(--border)" }}>
           <div className="max-w-7xl mx-auto px-6">
             <div className="flex items-center gap-4 overflow-x-auto pb-2 scrollbar-none">
-              <span className="text-xs font-semibold uppercase tracking-widest text-gray-600 shrink-0">
+              <span className="text-xs font-semibold uppercase tracking-widest shrink-0" style={{ color: "var(--muted)" }}>
                 Score Movers
               </span>
-              <div className="h-4 w-px bg-[#1f2937] shrink-0" />
+              <div className="h-4 w-px shrink-0" style={{ backgroundColor: "var(--border)" }} />
               {movers.map((m) => (
                 <div
                   key={m.actorId}
-                  className="flex items-center gap-2.5 shrink-0 bg-[#111111] border border-[#1f2937] rounded-lg px-3 py-2"
+                  className="flex items-center gap-2.5 shrink-0 rounded-lg px-3 py-2"
+                  style={{ backgroundColor: "var(--surface)", border: "1px solid var(--border)" }}
                 >
-                  <span className="text-sm font-semibold text-white">
+                  <span className="text-sm font-semibold" style={{ color: "var(--foreground)" }}>
                     {m.actorName}
                   </span>
-                  <span
-                    className="text-sm font-bold tabular-nums"
-                    style={{ color: pfScoreColor(m.pfScore) }}
-                  >
+                  <span className="text-sm font-bold tabular-nums" style={{ color: pfScoreColor(m.pfScore) }}>
                     {m.pfScore || "—"}
                   </span>
                   <ScoreDelta delta={m.delta} />
@@ -120,16 +120,13 @@ export default async function HomePage() {
       )}
 
       <div className="max-w-7xl mx-auto px-6 py-12 grid grid-cols-1 lg:grid-cols-3 gap-10">
-        {/* ── Left column: Leaderboard + Brief ─────────────────── */}
+        {/* ── Left column ───────────────────────────────────── */}
         <div className="lg:col-span-2 space-y-12">
           {/* Actor Leaderboard */}
           <section>
             <div className="flex items-center justify-between mb-6">
               <SectionLabel>Actor Leaderboard</SectionLabel>
-              <Link
-                href="/actors"
-                className="text-xs text-[#3b82f6] hover:text-[#60a5fa] transition-colors"
-              >
+              <Link href="/actors" className="text-xs transition-colors" style={{ color: "var(--accent)" }}>
                 View all →
               </Link>
             </div>
@@ -138,12 +135,7 @@ export default async function HomePage() {
             ) : (
               <div className="space-y-2">
                 {top10.map((actor, idx) => (
-                  <ActorCard
-                    key={actor.id}
-                    actor={actor}
-                    rank={idx + 1}
-                    delta={deltaRecord[actor.id] ?? 0}
-                  />
+                  <ActorCard key={actor.id} actor={actor} rank={idx + 1} delta={deltaRecord[actor.id] ?? 0} />
                 ))}
               </div>
             )}
@@ -153,10 +145,7 @@ export default async function HomePage() {
           <section>
             <div className="flex items-center justify-between mb-6">
               <SectionLabel>Latest Brief</SectionLabel>
-              <Link
-                href="/briefs"
-                className="text-xs text-[#3b82f6] hover:text-[#60a5fa] transition-colors"
-              >
+              <Link href="/briefs" className="text-xs transition-colors" style={{ color: "var(--accent)" }}>
                 All briefs →
               </Link>
             </div>
@@ -164,10 +153,16 @@ export default async function HomePage() {
               <EmptyState message="No briefs published yet." />
             ) : (
               <Link href={`/briefs/${latestBrief.id}`} className="block">
-                <div className="bg-[#111111] border border-[#1f2937] rounded-lg p-6 hover:border-[#3b82f6]/50 transition-colors">
+                <div
+                  className="rounded-lg p-6 transition-colors"
+                  style={{ backgroundColor: "var(--surface)", border: "1px solid var(--border)" }}
+                >
                   <div className="flex items-center gap-2 mb-3 flex-wrap">
                     {latestBrief.briefType && (
-                      <span className="text-xs px-2 py-0.5 rounded border border-[#3b82f6]/40 text-[#3b82f6] bg-[#3b82f6]/10 font-medium">
+                      <span
+                        className="text-xs px-2 py-0.5 rounded font-medium"
+                        style={{ color: "var(--accent)", border: "1px solid color-mix(in srgb, var(--accent) 40%, transparent)", backgroundColor: "color-mix(in srgb, var(--accent) 10%, transparent)" }}
+                      >
                         {latestBrief.briefType}
                       </span>
                     )}
@@ -175,41 +170,30 @@ export default async function HomePage() {
                       <span
                         className="text-xs px-2 py-0.5 rounded font-medium"
                         style={{
-                          color:
-                            latestBrief.status === "Final"
-                              ? "#22c55e"
-                              : "#eab308",
-                          backgroundColor:
-                            latestBrief.status === "Final"
-                              ? "#22c55e18"
-                              : "#eab30818",
+                          color: latestBrief.status === "Final" ? "var(--delta-up)" : "var(--score-mid)",
+                          backgroundColor: latestBrief.status === "Final" ? "color-mix(in srgb, var(--delta-up) 12%, transparent)" : "color-mix(in srgb, var(--score-mid) 12%, transparent)",
                         }}
                       >
                         {latestBrief.status}
                       </span>
                     )}
                   </div>
-                  <h3 className="text-white font-semibold text-lg mb-2">
+                  <h3 className="font-semibold text-lg mb-2" style={{ color: "var(--foreground)" }}>
                     {latestBrief.title || "Untitled Brief"}
                   </h3>
                   {(latestBrief.dateRangeStart || latestBrief.dateRangeEnd) && (
-                    <p className="text-xs text-gray-500 mb-3">
-                      {latestBrief.dateRangeStart &&
-                        new Date(latestBrief.dateRangeStart).toLocaleDateString(
-                          "en-US",
-                          { month: "short", day: "numeric", year: "numeric" }
-                        )}
-                      {latestBrief.dateRangeEnd &&
-                        ` – ${new Date(latestBrief.dateRangeEnd).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}`}
+                    <p className="text-xs mb-3" style={{ color: "var(--muted)" }}>
+                      {latestBrief.dateRangeStart && new Date(latestBrief.dateRangeStart).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                      {latestBrief.dateRangeEnd && ` – ${new Date(latestBrief.dateRangeEnd).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}`}
                     </p>
                   )}
                   {latestBrief.editorialPriority && (
-                    <p className="text-sm text-gray-400 line-clamp-3">
+                    <p className="text-sm line-clamp-3" style={{ color: "var(--muted-foreground)" }}>
                       {latestBrief.editorialPriority.slice(0, 300)}
                       {latestBrief.editorialPriority.length > 300 && "…"}
                     </p>
                   )}
-                  <span className="mt-4 inline-block text-sm text-[#3b82f6] font-medium">
+                  <span className="mt-4 inline-block text-sm font-medium" style={{ color: "var(--accent)" }}>
                     Read full brief →
                   </span>
                 </div>
@@ -218,7 +202,7 @@ export default async function HomePage() {
           </section>
         </div>
 
-        {/* ── Right column: Active Scenarios ───────────────────── */}
+        {/* ── Right column ──────────────────────────────────── */}
         <div className="space-y-12">
           <section>
             <div className="flex items-center justify-between mb-6">
@@ -231,28 +215,29 @@ export default async function HomePage() {
                 {scenarios.map((s) => (
                   <div
                     key={s.id}
-                    className="bg-[#111111] border border-[#1f2937] rounded-lg p-4"
+                    className="rounded-lg p-4"
+                    style={{ backgroundColor: "var(--surface)", border: "1px solid var(--border)" }}
                   >
                     <div className="flex items-start justify-between gap-2 mb-2">
-                      <h3 className="text-sm font-semibold text-white leading-snug">
+                      <h3 className="text-sm font-semibold leading-snug" style={{ color: "var(--foreground)" }}>
                         {s.name || "Unnamed Scenario"}
                       </h3>
-                      {s.probabilityEstimate !== "" &&
-                        s.probabilityEstimate !== 0 && (
-                          <span className="shrink-0 text-xs font-bold px-2 py-0.5 rounded bg-[#3b82f6]/15 text-[#60a5fa] tabular-nums border border-[#3b82f6]/30">
-                            {typeof s.probabilityEstimate === "number"
-                              ? `${s.probabilityEstimate}%`
-                              : s.probabilityEstimate}
-                          </span>
-                        )}
+                      {s.probabilityEstimate !== "" && s.probabilityEstimate !== 0 && (
+                        <span
+                          className="shrink-0 text-xs font-bold px-2 py-0.5 rounded tabular-nums"
+                          style={{ color: "var(--accent)", backgroundColor: "color-mix(in srgb, var(--accent) 15%, transparent)", border: "1px solid color-mix(in srgb, var(--accent) 30%, transparent)" }}
+                        >
+                          {typeof s.probabilityEstimate === "number" ? `${s.probabilityEstimate}%` : s.probabilityEstimate}
+                        </span>
+                      )}
                     </div>
                     {s.scenarioClass && (
-                      <span className="text-xs text-gray-600 font-medium uppercase tracking-wide">
+                      <span className="text-xs font-medium uppercase tracking-wide" style={{ color: "var(--muted)" }}>
                         {s.scenarioClass}
                       </span>
                     )}
                     {s.triggerCondition && (
-                      <p className="text-xs text-gray-500 mt-2 leading-relaxed">
+                      <p className="text-xs mt-2 leading-relaxed" style={{ color: "var(--muted)" }}>
                         {s.triggerCondition.slice(0, 100)}
                         {s.triggerCondition.length > 100 && "…"}
                       </p>
@@ -263,7 +248,6 @@ export default async function HomePage() {
             )}
           </section>
 
-          {/* Quick links */}
           <section>
             <SectionLabel>Navigate</SectionLabel>
             <div className="space-y-1.5">
@@ -275,14 +259,13 @@ export default async function HomePage() {
                 <Link
                   key={href}
                   href={href}
-                  className="flex items-start gap-3 p-3 rounded-lg border border-[#1f2937] hover:border-[#3b82f6]/40 hover:bg-[#111111] transition-colors group"
+                  className="flex items-start gap-3 p-3 rounded-lg transition-colors group"
+                  style={{ border: "1px solid var(--border)" }}
                 >
-                  <span className="w-1 h-1 rounded-full bg-[#3b82f6] mt-2 shrink-0 group-hover:bg-[#60a5fa] transition-colors" />
+                  <span className="w-1 h-1 rounded-full mt-2 shrink-0" style={{ backgroundColor: "var(--accent)" }} />
                   <div>
-                    <p className="text-sm font-medium text-white group-hover:text-[#60a5fa] transition-colors">
-                      {label}
-                    </p>
-                    <p className="text-xs text-gray-600">{desc}</p>
+                    <p className="text-sm font-medium" style={{ color: "var(--foreground)" }}>{label}</p>
+                    <p className="text-xs" style={{ color: "var(--muted)" }}>{desc}</p>
                   </div>
                 </Link>
               ))}
