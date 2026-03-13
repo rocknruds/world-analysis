@@ -16,7 +16,7 @@ export const revalidate = 300;
 
 export async function generateStaticParams() {
   const actors = await getAllPublicActors();
-  return actors.map((a) => ({ slug: a.id }));
+  return actors.map((a) => ({ slug: a.slug }));
 }
 
 export async function generateMetadata({
