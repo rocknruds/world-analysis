@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import Link from "next/link";
-import type { Actor } from "@/lib/actors";
+import type { Actor } from "@/lib/types";
 import { actorTypeBadgeColor, pfScoreColor } from "./ActorCard";
 import ScoreDelta from "./ScoreDelta";
 
@@ -73,7 +73,7 @@ export default function ActorTable({ actors, snapshotDeltaMap }: ActorTableProps
     [actors]
   );
   const regions = useMemo(
-    () => [...new Set(actors.map((a) => a.region).filter(Boolean))].sort(),
+    () => [...new Set(actors.map((a) => a.region).filter((r): r is string => r !== null))].sort(),
     [actors]
   );
 
@@ -84,7 +84,7 @@ export default function ActorTable({ actors, snapshotDeltaMap }: ActorTableProps
     result.sort((a, b) => {
       const dir = sortDir === "asc" ? 1 : -1;
       if (sortBy === "name") return dir * a.name.localeCompare(b.name);
-      return dir * ((a[sortBy] as number) - (b[sortBy] as number));
+      return dir * (((a[sortBy] as number) ?? -1) - ((b[sortBy] as number) ?? -1));
     });
     return result;
   }, [actors, typeFilter, regionFilter, sortBy, sortDir]);
@@ -183,7 +183,7 @@ export default function ActorTable({ actors, snapshotDeltaMap }: ActorTableProps
             ) : (
               filtered.map((actor, idx) => {
                 const delta = snapshotDeltaMap[actor.id] ?? 0;
-                const scoreColor = pfScoreColor(actor.pfScore);
+                const scoreColor = pfScoreColor(actor.pfScore ?? 0);
                 return (
                   <tr
                     key={actor.id}
@@ -194,7 +194,7 @@ export default function ActorTable({ actors, snapshotDeltaMap }: ActorTableProps
                     </td>
                     <td className="py-3 pr-4">
                       <Link
-                        href={`/actors/${actor.id}`}
+                        href={`/actors/${actor.slug}`}
                         className="text-white hover:text-[#3b82f6] transition-colors font-medium"
                       >
                         {actor.name || "—"}
@@ -204,17 +204,17 @@ export default function ActorTable({ actors, snapshotDeltaMap }: ActorTableProps
                       <ActorTypeBadge type={actor.actorType} />
                     </td>
                     <td className="py-3 pr-4 text-gray-300 tabular-nums">
-                      {actor.authorityScore || "—"}
+                      {actor.authorityScore ?? "—"}
                     </td>
                     <td className="py-3 pr-4 text-gray-300 tabular-nums">
-                      {actor.reachScore || "—"}
+                      {actor.reachScore ?? "—"}
                     </td>
                     <td className="py-3 pr-4">
                       <span
                         className="font-bold text-base tabular-nums"
                         style={{ color: scoreColor }}
                       >
-                        {actor.pfScore || "—"}
+                        {actor.pfScore ?? "—"}
                       </span>
                     </td>
                     <td className="py-3 pr-4 text-gray-500 text-xs">
