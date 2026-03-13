@@ -106,7 +106,6 @@ const [history, events, scenarios] = await Promise.all([
   getActorScenarios(actor.id),
 ]);
 
-  if (!actor) notFound();
 
   const pf = calcPFScore(actor.authorityScore, actor.reachScore);
   const scoreColor = pfScoreColor(pf ?? 0);
