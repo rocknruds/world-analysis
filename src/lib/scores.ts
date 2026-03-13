@@ -122,6 +122,7 @@ export function computeScoreMovers(
 
   const toMover = (a: Actor & { scoreDelta: number }): ScoreMover => ({
     actorId: a.id,
+    actorSlug: a.slug,
     actorName: a.name,
     pfScore: a.pfScore!,
     delta: a.scoreDelta,

@@ -58,6 +58,7 @@ export interface ScoreHistoryPoint {
 
 export interface ScoreMover {
   actorId: string
+  actorSlug: string
   actorName: string
   pfScore: number
   delta: number

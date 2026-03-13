@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
+import LogoMark from "@/components/LogoMark";
 
 const NAV_LINKS = [
   { label: "Dashboard", href: "/" },
@@ -15,29 +16,28 @@ export default function Masthead() {
   const pathname = usePathname();
 
   return (
-    <header className="sticky top-0 z-50 border-b backdrop-blur-md"
-      style={{ backgroundColor: "color-mix(in srgb, var(--background) 90%, transparent)", borderColor: "var(--border)" }}
+    <header
+      className="sticky top-0 z-50 border-b backdrop-blur-md"
+      style={{
+        backgroundColor: "color-mix(in srgb, var(--background) 90%, transparent)",
+        borderColor: "var(--border)",
+      }}
     >
       <div className="max-w-7xl mx-auto px-6 h-14 flex items-center justify-between">
-        {/* Wordmark */}
         <Link
           href="/"
-          className="flex items-center gap-2 group"
+          className="flex items-center gap-2.5 group"
           aria-label="PowerFlow home"
         >
+          <LogoMark size={22} />
           <span
-            className="w-2 h-2 rounded-full transition-colors"
-            style={{ backgroundColor: "var(--accent)" }}
-          />
-          <span
-            className="text-sm font-semibold tracking-[0.12em] uppercase transition-colors"
+            className="text-sm font-medium tracking-wide transition-colors"
             style={{ color: "var(--foreground)" }}
           >
-            PowerFlow
+            Power<span style={{ color: "var(--accent)" }}>Flow</span>
           </span>
         </Link>
 
-        {/* Nav + Toggle */}
         <div className="flex items-center gap-2">
           <nav className="flex items-center gap-1">
             {NAV_LINKS.map(({ label, href }) => {

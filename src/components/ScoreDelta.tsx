@@ -1,5 +1,5 @@
 interface ScoreDeltaProps {
-  delta?: number;
+  delta?: number | null;
   className?: string;
 }
 
