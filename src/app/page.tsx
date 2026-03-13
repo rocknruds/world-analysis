@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ArrowRight, TrendingUp, Network, Activity, GitBranch, Zap, Database, Brain, LineChart, Globe } from "lucide-react";
 import { getAllPublicActors, enrichActorsWithDeltas } from "@/lib/actors";
 import { getLatestDeltaByActor, computeScoreMovers } from "@/lib/scores";
 import { getLatestBrief } from "@/lib/briefs";
@@ -9,6 +10,71 @@ import { pfScoreColor } from "@/components/ActorCard";
 
 export const revalidate = 300;
 
+// ── Features data ─────────────────────────────────────────
+const features = [
+  {
+    icon: Activity,
+    title: "Authority & Reach Scoring",
+    description:
+      "Every actor is scored on two dimensions: Authority (internal control) and Reach (external influence). Scores update as events unfold.",
+    color: "var(--score-authority)",
+  },
+  {
+    icon: GitBranch,
+    title: "Dependency Mapping",
+    description:
+      "Understand how power flows through relationships. See which actors depend on others and how disturbances cascade through the system.",
+    color: "var(--accent)",
+  },
+  {
+    icon: TrendingUp,
+    title: "Score Trajectories",
+    description:
+      "Track how influence shifts over time. Visualize the rise and fall of actors through historical score analysis.",
+    color: "var(--score-high)",
+  },
+  {
+    icon: Zap,
+    title: "AI-Powered Intelligence",
+    description:
+      "Agents continuously ingest intelligence, update scores, and surface reasoning from a private Notion knowledge graph.",
+    color: "var(--score-reach)",
+  },
+];
+
+// ── HowItWorks data ────────────────────────────────────────
+const steps = [
+  {
+    icon: Database,
+    number: "01",
+    title: "Continuous Ingestion",
+    description:
+      "Intelligence agents monitor events, analyze developments, and extract signals from a private Notion knowledge graph.",
+  },
+  {
+    icon: Brain,
+    number: "02",
+    title: "Dynamic Scoring",
+    description:
+      "Every event updates Authority and Reach scores. The system tracks not just what happened, but how it shifts power dynamics.",
+  },
+  {
+    icon: LineChart,
+    number: "03",
+    title: "Cascade Analysis",
+    description:
+      "Dependencies are traced. When one actor shifts, the system maps how disturbances propagate through connected nodes.",
+  },
+  {
+    icon: Globe,
+    number: "04",
+    title: "Public Interface",
+    description:
+      "A Next.js app translates analysis into actor profiles, score trajectories, and conflict tracking—designed for clarity, not clutter.",
+  },
+];
+
+// ── Sub-components ─────────────────────────────────────────
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex items-center gap-3 mb-6">
@@ -31,6 +97,7 @@ function EmptyState({ message }: { message: string }) {
   );
 }
 
+// ── Page ───────────────────────────────────────────────────
 export default async function HomePage() {
   const [actors, deltaMap, latestBrief, scenarios] = await Promise.all([
     getAllPublicActors(),
@@ -54,48 +121,99 @@ export default async function HomePage() {
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: "var(--background)", color: "var(--foreground)" }}>
-      {/* ── Hero ─────────────────────────────────────────────── */}
-      <section className="py-16 md:py-20" style={{ borderBottom: "1px solid var(--border)" }}>
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="max-w-2xl">
-            <div className="flex items-center gap-2 mb-5">
-              <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ backgroundColor: "var(--accent)" }} />
-              <span className="text-xs font-medium tracking-widest uppercase" style={{ color: "var(--accent)" }}>
-                PowerFlow Lab
-              </span>
+
+      {/* ── Hero ──────────────────────────────────────────── */}
+      <section className="relative pt-32 pb-24 px-6" style={{ borderBottom: "1px solid var(--border)" }}>
+        <div className="max-w-7xl mx-auto">
+          <div className="max-w-4xl mx-auto text-center">
+
+            {/* Accent badge */}
+            <div
+              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm mb-8"
+              style={{
+                backgroundColor: "color-mix(in srgb, var(--accent) 10%, transparent)",
+                border: "1px solid color-mix(in srgb, var(--accent) 20%, transparent)",
+                color: "var(--accent)",
+              }}
+            >
+              <Network className="w-3.5 h-3.5" />
+              <span>Geopolitical Intelligence Platform</span>
             </div>
-            <h1 className="text-5xl md:text-6xl font-bold tracking-tight leading-tight mb-5" style={{ color: "var(--foreground)" }}>
-              PowerFlow
+
+            {/* Headline */}
+            <h1
+              className="text-5xl md:text-7xl mb-6 tracking-tight font-serif"
+              style={{ color: "var(--foreground)" }}
+            >
+              Track How Power
+              <br />
+              <span style={{ color: "var(--accent)" }}>Actually Moves</span>
             </h1>
-            <p className="text-lg leading-relaxed max-w-xl" style={{ color: "var(--muted)" }}>
-              We don&apos;t analyze what governments claim. We analyze where power actually moves.
+
+            {/* Subheadline */}
+            <p
+              className="text-lg md:text-xl max-w-2xl mx-auto mb-10 leading-relaxed"
+              style={{ color: "var(--muted-foreground)" }}
+            >
+              Not as states declare it, but as events reveal it. PowerFlow maps authority, reach, and
+              dependencies across actors—creating a living record of geopolitical reality.
             </p>
-            <div className="flex items-center gap-4 mt-8">
+
+            {/* CTAs */}
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
               <Link
                 href="/actors"
-                className="px-5 py-2.5 text-sm font-semibold rounded-lg transition-colors text-white"
-                style={{ backgroundColor: "var(--accent)" }}
+                className="w-full sm:w-auto px-6 py-3 rounded-md text-sm font-semibold flex items-center justify-center gap-2 transition-opacity hover:opacity-90"
+                style={{ backgroundColor: "var(--accent)", color: "#ffffff" }}
               >
-                Actor Leaderboard
+                Get Started
+                <ArrowRight className="w-4 h-4" />
               </Link>
               <Link
                 href="/briefs"
-                className="px-5 py-2.5 text-sm font-semibold rounded-lg transition-colors"
+                className="w-full sm:w-auto px-6 py-3 rounded-md text-sm font-semibold transition-colors"
                 style={{ border: "1px solid var(--border)", color: "var(--muted-foreground)" }}
               >
                 Latest Briefs
               </Link>
             </div>
+
+            {/* Stats strip */}
+            <div
+              className="grid grid-cols-1 sm:grid-cols-3 gap-8 max-w-3xl mx-auto pt-8"
+              style={{ borderTop: "1px solid var(--border)" }}
+            >
+              <div>
+                <div className="text-3xl font-serif mb-1" style={{ color: "var(--foreground)" }}>
+                  {actors.length}+
+                </div>
+                <div className="text-sm" style={{ color: "var(--muted)" }}>Tracked Actors</div>
+              </div>
+              <div>
+                <div className="text-3xl font-serif mb-1" style={{ color: "var(--accent)" }}>
+                  Live
+                </div>
+                <div className="text-sm" style={{ color: "var(--muted)" }}>Real-time Updates</div>
+              </div>
+              <div className="flex items-center justify-center gap-1.5">
+                <TrendingUp className="w-5 h-5" style={{ color: "var(--score-high)" }} />
+                <div className="text-3xl font-serif" style={{ color: "var(--foreground)" }}>24/7</div>
+                <div className="ml-2 text-sm" style={{ color: "var(--muted)" }}>Intelligence</div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* ── Score Movers Strip ───────────────────────────────── */}
+      {/* ── Score Movers Strip ─────────────────────────────── */}
       {movers.length > 0 && (
         <section className="py-6" style={{ borderBottom: "1px solid var(--border)" }}>
           <div className="max-w-7xl mx-auto px-6">
-            <div className="flex items-center gap-4 overflow-x-auto pb-2 scrollbar-none">
-              <span className="text-xs font-semibold uppercase tracking-widest shrink-0" style={{ color: "var(--muted)" }}>
+            <div className="flex items-center gap-4 overflow-x-auto pb-2">
+              <span
+                className="text-xs font-semibold uppercase tracking-widest shrink-0"
+                style={{ color: "var(--muted)" }}
+              >
                 Score Movers
               </span>
               <div className="h-4 w-px shrink-0" style={{ backgroundColor: "var(--border)" }} />
@@ -119,10 +237,113 @@ export default async function HomePage() {
         </section>
       )}
 
-      <div className="max-w-7xl mx-auto px-6 py-12 grid grid-cols-1 lg:grid-cols-3 gap-10">
-        {/* ── Left column ───────────────────────────────────── */}
+      {/* ── Features ──────────────────────────────────────── */}
+      <section
+        className="py-24 px-6"
+        style={{ backgroundColor: "var(--surface)", borderBottom: "1px solid var(--border)" }}
+      >
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <h2
+              className="text-4xl md:text-5xl mb-4 tracking-tight font-serif"
+              style={{ color: "var(--foreground)" }}
+            >
+              Intelligence That Adapts
+            </h2>
+            <p className="text-lg max-w-2xl mx-auto" style={{ color: "var(--muted-foreground)" }}>
+              A living record of geopolitical reality, not just another static dashboard
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {features.map((feature, index) => (
+              <div
+                key={index}
+                className="p-8 rounded-lg transition-all group"
+                style={{
+                  border: "1px solid var(--border)",
+                  backgroundColor: "var(--background)",
+                }}
+              >
+                <div
+                  className="w-12 h-12 rounded-lg mb-4 flex items-center justify-center"
+                  style={{ backgroundColor: `color-mix(in srgb, ${feature.color} 15%, transparent)` }}
+                >
+                  <feature.icon className="w-6 h-6" style={{ color: feature.color }} />
+                </div>
+                <h3
+                  className="text-xl mb-3 font-semibold transition-colors"
+                  style={{ color: "var(--foreground)" }}
+                >
+                  {feature.title}
+                </h3>
+                <p className="leading-relaxed" style={{ color: "var(--muted-foreground)" }}>
+                  {feature.description}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── How It Works ──────────────────────────────────── */}
+      <section className="py-24 px-6" style={{ borderBottom: "1px solid var(--border)" }}>
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <h2
+              className="text-4xl md:text-5xl mb-4 tracking-tight font-serif"
+              style={{ color: "var(--foreground)" }}
+            >
+              From Events to Insight
+            </h2>
+            <p className="text-lg max-w-2xl mx-auto" style={{ color: "var(--muted-foreground)" }}>
+              A systematic approach to understanding how power actually operates
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {steps.map((step, index) => (
+              <div key={index} className="relative">
+                {index < steps.length - 1 && (
+                  <div
+                    className="hidden lg:block absolute top-7 left-full w-full h-px"
+                    style={{ backgroundColor: "var(--border)", transform: "translateX(-50%)" }}
+                  />
+                )}
+                <div className="relative z-10">
+                  <div
+                    className="w-14 h-14 rounded-lg flex items-center justify-center mb-4"
+                    style={{
+                      backgroundColor: "color-mix(in srgb, var(--accent) 10%, transparent)",
+                      border: "1px solid color-mix(in srgb, var(--accent) 20%, transparent)",
+                    }}
+                  >
+                    <step.icon className="w-7 h-7" style={{ color: "var(--accent)" }} />
+                  </div>
+                  <div
+                    className="text-5xl font-serif mb-2"
+                    style={{ color: "var(--foreground)", opacity: 0.2 }}
+                  >
+                    {step.number}
+                  </div>
+                  <h3 className="text-lg mb-2 font-semibold" style={{ color: "var(--foreground)" }}>
+                    {step.title}
+                  </h3>
+                  <p className="text-sm leading-relaxed" style={{ color: "var(--muted-foreground)" }}>
+                    {step.description}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Live Data ─────────────────────────────────────── */}
+      <div className="max-w-7xl mx-auto px-6 py-16 grid grid-cols-1 lg:grid-cols-3 gap-10">
+
+        {/* Actor Leaderboard */}
         <div className="lg:col-span-2 space-y-12">
-          {/* Actor Leaderboard */}
           <section>
             <div className="flex items-center justify-between mb-6">
               <SectionLabel>Actor Leaderboard</SectionLabel>
@@ -161,7 +382,11 @@ export default async function HomePage() {
                     {latestBrief.briefType && (
                       <span
                         className="text-xs px-2 py-0.5 rounded font-medium"
-                        style={{ color: "var(--accent)", border: "1px solid color-mix(in srgb, var(--accent) 40%, transparent)", backgroundColor: "color-mix(in srgb, var(--accent) 10%, transparent)" }}
+                        style={{
+                          color: "var(--accent)",
+                          border: "1px solid color-mix(in srgb, var(--accent) 40%, transparent)",
+                          backgroundColor: "color-mix(in srgb, var(--accent) 10%, transparent)",
+                        }}
                       >
                         {latestBrief.briefType}
                       </span>
@@ -171,7 +396,10 @@ export default async function HomePage() {
                         className="text-xs px-2 py-0.5 rounded font-medium"
                         style={{
                           color: latestBrief.status === "Final" ? "var(--delta-up)" : "var(--score-mid)",
-                          backgroundColor: latestBrief.status === "Final" ? "color-mix(in srgb, var(--delta-up) 12%, transparent)" : "color-mix(in srgb, var(--score-mid) 12%, transparent)",
+                          backgroundColor:
+                            latestBrief.status === "Final"
+                              ? "color-mix(in srgb, var(--delta-up) 12%, transparent)"
+                              : "color-mix(in srgb, var(--score-mid) 12%, transparent)",
                         }}
                       >
                         {latestBrief.status}
@@ -183,8 +411,18 @@ export default async function HomePage() {
                   </h3>
                   {(latestBrief.dateRangeStart || latestBrief.dateRangeEnd) && (
                     <p className="text-xs mb-3" style={{ color: "var(--muted)" }}>
-                      {latestBrief.dateRangeStart && new Date(latestBrief.dateRangeStart).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
-                      {latestBrief.dateRangeEnd && ` – ${new Date(latestBrief.dateRangeEnd).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}`}
+                      {latestBrief.dateRangeStart &&
+                        new Date(latestBrief.dateRangeStart).toLocaleDateString("en-US", {
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric",
+                        })}
+                      {latestBrief.dateRangeEnd &&
+                        ` – ${new Date(latestBrief.dateRangeEnd).toLocaleDateString("en-US", {
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric",
+                        })}`}
                     </p>
                   )}
                   {latestBrief.editorialPriority && (
@@ -202,7 +440,7 @@ export default async function HomePage() {
           </section>
         </div>
 
-        {/* ── Right column ──────────────────────────────────── */}
+        {/* Right column */}
         <div className="space-y-12">
           <section>
             <div className="flex items-center justify-between mb-6">
@@ -225,9 +463,15 @@ export default async function HomePage() {
                       {s.probabilityEstimate !== "" && s.probabilityEstimate !== 0 && (
                         <span
                           className="shrink-0 text-xs font-bold px-2 py-0.5 rounded tabular-nums"
-                          style={{ color: "var(--accent)", backgroundColor: "color-mix(in srgb, var(--accent) 15%, transparent)", border: "1px solid color-mix(in srgb, var(--accent) 30%, transparent)" }}
+                          style={{
+                            color: "var(--accent)",
+                            backgroundColor: "color-mix(in srgb, var(--accent) 15%, transparent)",
+                            border: "1px solid color-mix(in srgb, var(--accent) 30%, transparent)",
+                          }}
                         >
-                          {typeof s.probabilityEstimate === "number" ? `${s.probabilityEstimate}%` : s.probabilityEstimate}
+                          {typeof s.probabilityEstimate === "number"
+                            ? `${s.probabilityEstimate}%`
+                            : s.probabilityEstimate}
                         </span>
                       )}
                     </div>
@@ -259,7 +503,7 @@ export default async function HomePage() {
                 <Link
                   key={href}
                   href={href}
-                  className="flex items-start gap-3 p-3 rounded-lg transition-colors group"
+                  className="flex items-start gap-3 p-3 rounded-lg transition-colors"
                   style={{ border: "1px solid var(--border)" }}
                 >
                   <span className="w-1 h-1 rounded-full mt-2 shrink-0" style={{ backgroundColor: "var(--accent)" }} />
