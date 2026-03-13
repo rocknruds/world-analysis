@@ -21,7 +21,6 @@ function parsePage(page: any): Omit<ConflictPublic, 'linkedActors'> {
     startYear: getNumber(props, 'Start Year'),
     pfGapScore: getNumber(props, 'PF Gap Score'),
     linkedActorIds: getRelationIds(props, 'Linked Actors'),
-    linkedActors: [],  // populated by enrichConflictsWithActors()
   }
 }
 
