@@ -43,7 +43,7 @@ export default async function HomePage() {
           style={{ borderBottom: "1px solid var(--border)" }}
         >
           <h1
-            className="font-serif font-semibold leading-[1.05] tracking-tight mb-5"
+            className="font-sans font-semibold leading-[1.05] tracking-tight mb-5 text-center"
             style={{ fontSize: "clamp(40px, 6vw, 62px)", color: "var(--foreground)" }}
           >
             Track How Power
@@ -52,14 +52,14 @@ export default async function HomePage() {
           </h1>
 
           <p
-            className="text-base leading-relaxed mb-8 max-w-md"
+            className="text-base leading-relaxed mb-8 max-w-xl mx-auto text-center"
             style={{ color: "var(--muted-foreground)" }}
           >
             Not as states declare it — as events reveal it. Authority scores,
             dependency maps, and conflict tracking updated as the world shifts.
           </p>
 
-          <div className="flex items-center gap-3 mb-12">
+          <div className="flex items-center justify-center gap-3 mb-12">
             <Link
               href="/actors"
               className="px-5 py-2.5 rounded-md text-sm font-medium transition-opacity hover:opacity-90"
@@ -91,12 +91,12 @@ export default async function HomePage() {
                 />
                 Score movers — last 30 days
               </div>
-              <div className="flex flex-wrap justify-between gap-y-2">
+              <div className="flex flex-wrap justify-center gap-2.5">
                 {movers.map((m) => (
                   <Link
                     key={m.actorId}
                     href={`/actors/${m.actorSlug}`}
-                    className="flex items-center gap-2 px-3 py-1.5 rounded-md transition-colors"
+                    className="flex items-center gap-1 px-3 py-1.5 rounded-md transition-colors"
                     style={{
                       border: "1px solid var(--border)",
                       backgroundColor: "var(--surface)",

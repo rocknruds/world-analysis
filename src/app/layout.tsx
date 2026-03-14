@@ -1,29 +1,13 @@
 import type { Metadata } from "next";
-import localFont from "next/font/local";
-import { Playfair_Display } from "next/font/google";
+import { Geologica } from "next/font/google";
 import "./globals.css";
 import Masthead from "@/components/Masthead";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
 
-const funnelSans = localFont({
-  src: [
-    {
-      path: "../../fonts/Funnel_Sans/FunnelSans-VariableFont_wght.ttf",
-      style: "normal",
-    },
-    {
-      path: "../../fonts/Funnel_Sans/FunnelSans-Italic-VariableFont_wght.ttf",
-      style: "italic",
-    },
-  ],
-  variable: "--font-funnel",
-  display: "swap",
-});
-
-const playfair = Playfair_Display({
+const geologica = Geologica({
   subsets: ["latin"],
-  variable: "--font-serif",
-  weight: ["500", "600", "700"],
+  variable: "--font-geologica",
+  weight: ["300", "400", "500", "600", "700"],
   display: "swap",
 });
 
@@ -44,7 +28,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${funnelSans.variable} ${playfair.variable}`} suppressHydrationWarning>
+    <html lang="en" className={geologica.variable} suppressHydrationWarning>
       <body className="font-sans antialiased min-h-screen">
         <ThemeProvider>
           <Masthead />

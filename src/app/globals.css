@@ -143,7 +143,7 @@
   --color-delta-up: var(--delta-up);
   --color-delta-down: var(--delta-down);
 
-  --font-family-sans: var(--font-funnel);
+  --font-family-sans: var(--font-geologica);
   --font-family-serif: var(--font-serif);
 }
 
@@ -154,7 +154,7 @@
 body {
   background-color: var(--background);
   color: var(--foreground);
-  font-family: var(--font-funnel), ui-sans-serif, system-ui;
+  font-family: var(--font-geologica), ui-sans-serif, system-ui;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }

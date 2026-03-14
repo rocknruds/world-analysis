@@ -26,15 +26,28 @@ export default function Masthead() {
       <div className="max-w-7xl mx-auto px-6 h-14 flex items-center justify-between">
         <Link
           href="/"
-          className="flex items-center gap-2.5 group"
+          className="flex items-center gap-2 group"
           aria-label="PowerFlow home"
         >
-          <LogoMark size={22} />
+          <div className="flex items-center" style={{ marginTop: "1px" }}>
+            <LogoMark size={20} />
+          </div>
           <span
-            className="text-sm font-medium tracking-wide transition-colors"
-            style={{ color: "var(--foreground)" }}
+            className="font-sans text-sm tracking-widest"
+            style={{ letterSpacing: "0.12em", lineHeight: 1 }}
           >
-            Power<span style={{ color: "var(--accent)" }}>Flow</span>
+            <span
+              className="font-normal"
+              style={{ color: "var(--foreground)", opacity: 0.85 }}
+            >
+              Power
+            </span>
+            <span
+              className="font-semibold"
+              style={{ color: "var(--accent)" }}
+            >
+              Flow
+            </span>
           </span>
         </Link>
 
